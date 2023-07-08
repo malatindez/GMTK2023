@@ -1,0 +1,71 @@
+#pragma kernel VisibilityCone
+
+RWTexture2D<float> FurthestVisibleDistances;
+Texture2D<float> MapDepthTexture;
+float2 RayOrigin;
+float2 RayDirection;
+float ViewAngle;
+float ViewDistance;
+int NumRaysPerDegree;
+int NumSteps;
+float MinDepth;
+int RayTextureSize;
+
+float2x2 rotate(float angle)
+{
+    return float2x2(
+        cos(angle), -sin(angle),
+        sin(angle), cos(angle));
+}
+
+void Raymarch(inout float t, float2 rayOrigin, float2 direction, float dt)
+{
+    // Raymarch through the depth map
+    for(int i = 0; i < NumSteps; i++) {
+        float2 currentPos = rayOrigin + direction * t;
+        float2 texPos = currentPos.xy;
+
+        // Sample the depth map
+        float depth = MapDepthTexture.Load(int3(texPos, 0)).r;
+
+        // If we hit something, break out of the loop
+        if(MinDepth < depth) {
+            break;
+        }
+
+        // Move further along the ray
+        t += dt;
+    }
+}
+
+[numthreads(64, 1, 1)]
+void VisibilityCone (uint3 id : SV_DispatchThreadID)
+{
+    float halfViewAngle = ViewAngle / 2.0f;
+    int numRays = ceil(ViewAngle * NumRaysPerDegree);
+    float angleStep = ViewAngle / (float)(numRays - 1);
+
+    // find the angle depending on ray index.
+    float angle = -halfViewAngle + id.x * angleStep;
+    float2 direction = mul(rotate(angle), RayDirection);
+    float2 rayOrigin = RayOrigin;
+    float2 rayEnd = rayOrigin + direction * ViewDistance;
+    
+    direction = normalize(direction);
+
+    float t = 0.0;
+    
+    // Step size
+    float dt = ViewDistance / (float)NumSteps;
+    Raymarch(t, rayOrigin, direction, dt);
+
+    // find the closest point
+    dt = dt / (float)NumSteps;
+    Raymarch(t, rayOrigin, direction, dt);
+
+    // Write furthest visible distance to buffer
+    int x = id.x % RayTextureSize;
+    int y = id.x / RayTextureSize;
+    int2 texCoord = int2(x,y);
+    FurthestVisibleDistances[texCoord] = t;
+}
