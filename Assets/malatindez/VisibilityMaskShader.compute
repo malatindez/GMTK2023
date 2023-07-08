@@ -5,42 +5,55 @@
 // with cs.SetTexture
 
 RWTexture2D<float> FurthestVisibleDistances;
-RWTexture2D<uint> Result;
+Texture2D<float> DepthMap;
+RWTexture2D<float> Result;
 float2 RayOrigin;
 float2 RayDirection;
 float ViewAngle;
 float ViewDistance;
 int NumRaysPerDegree;
 int RayTextureSize;
+int VisibilityMaskWidth;
+int VisibilityMaskHeight;
+
+float2x2 rotate(float angle)
+{
+    return float2x2(
+        cos(angle), -sin(angle),
+        sin(angle), cos(angle));
+}
 
 [numthreads(8,8,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
-    float halfViewAngle = ViewAngle / 2.0f;
+    float halfViewAngle = radians(ViewAngle) / 2.0f;
     int numRays = ceil(ViewAngle * NumRaysPerDegree);
-    float angleStep = ViewAngle / (float) (numRays - 1);
+    float angleStep = radians(ViewAngle) / (float) (numRays - 1);
 
-    float3 worldPos = i.worldPos.xyz;
-
-    float2 toPixel = worldPos.xz - RayOrigin;
+    float2 worldPos = id.xy / float2(VisibilityMaskWidth, VisibilityMaskHeight);
+    float2 toPixel = worldPos.xy - RayOrigin;
+    float distance = length(toPixel.xy);
                         
     float2 normalizedToPixel = normalize(toPixel.xy);
     float2 normalizedRayDirection = normalize(RayDirection);
+    normalizedRayDirection = mul(rotate(-halfViewAngle), normalizedRayDirection);
 
     float dotProduct = dot(normalizedToPixel, normalizedRayDirection);
     float angle = acos(dotProduct);
-
-    int rayId = int((angle + halfViewAngle) / angleStep);
-    float distance = length(toPixel.xy);
-                        
-    float2 rayTextureCoord = float2(rayId % (uint) RayTextureSize, rayId / (uint) RayTextureSize) / (uint) RayTextureSize;
-    float furthestVisibleDistance = tex2D(_FurthestVisibleDistances, rayTextureCoord).r;
-                        
+    
+    int rayId = int(angle / angleStep);
+    if(rayId > numRays - 1)
+    {
+        Result[id.xy] = DepthMap[id.xy];
+        return;
+    }
+    int2 rayTextureCoord = int2(rayId % RayTextureSize, rayId / RayTextureSize);
+    float furthestVisibleDistance = FurthestVisibleDistances[rayTextureCoord].r;
+    
     if (distance > furthestVisibleDistance)
     {
-        return 127;
+        Result[id.xy] = DepthMap[id.xy];
+        return;
     }
-
-    uint col = lerp(0.0f, 0.5f, distance / _ViewDistance) * 255;
-    Result[id.xy] = col;
+    Result[id.xy] = furthestVisibleDistance;
 }

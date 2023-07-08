@@ -2,6 +2,7 @@
 
 RWTexture2D<float> FurthestVisibleDistances;
 Texture2D<float> MapDepthTexture;
+float2 MapDepthTextureSize;
 float2 RayOrigin;
 float2 RayDirection;
 float ViewAngle;
@@ -27,9 +28,9 @@ void Raymarch(inout float t, float2 rayOrigin, float2 direction, float dt)
         if(texPos.x < 0.0 || texPos.x > 1.0 || texPos.y < 0.0 || texPos.y > 1.0) {
             break;
         }
-
+        int3 texPosPixels = int3(texPos.xy * MapDepthTextureSize, 0);
         // Sample the depth map
-        float depth = MapDepthTexture.Load(int3(texPos, 0)).r;
+        float depth = MapDepthTexture.Load(texPosPixels).r;
 
         // If we hit something, break out of the loop
         if(MinDepth < depth) {
@@ -44,9 +45,9 @@ void Raymarch(inout float t, float2 rayOrigin, float2 direction, float dt)
 [numthreads(64, 1, 1)]
 void VisibilityCone (uint3 id : SV_DispatchThreadID)
 {
-    float halfViewAngle = ViewAngle / 2.0f;
+    float halfViewAngle = radians(ViewAngle) / 2.0f;
     int numRays = ceil(ViewAngle * NumRaysPerDegree);
-    float angleStep = ViewAngle / (float)(numRays - 1);
+    float angleStep = radians(ViewAngle) / (float) (numRays - 1);
 
     // find the angle depending on ray index.
     float angle = -halfViewAngle + id.x * angleStep;
@@ -69,8 +70,9 @@ void VisibilityCone (uint3 id : SV_DispatchThreadID)
     int x = id.x % RayTextureSize;
     int y = id.x / RayTextureSize;
     int2 texCoord = int2(x,y);
-    if(x > RayTextureSize || y > RayTextureSize) {
-        return;
+    if (x > RayTextureSize || y > RayTextureSize)
+    {
+        FurthestVisibleDistances[texCoord] = 0;
     }
-    FurthestVisibleDistances[texCoord] = t;
+    FurthestVisibleDistances[texCoord] = min(t, ViewDistance);
 }
