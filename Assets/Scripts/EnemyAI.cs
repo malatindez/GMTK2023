@@ -78,6 +78,14 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.collider.gameObject.TryGetComponent(out Player player))
+        {
+            player.TryKill();
+        }
+    }
+
     private bool ComaprePoints(Vector3 left, Vector3 right)
     {
         Vector2 a = new Vector2(left.x, left.z);
@@ -88,8 +96,12 @@ public class EnemyAI : MonoBehaviour
 
     private IEnumerator Hunt()
     {
-        Debug.Log("Hunt NOT IMPLEMENTED YET!");
-        yield return new WaitForSeconds(1);
+        while (true)
+        {
+            Debug.Log("TODO: ADD LOGIC");
+
+            yield return new WaitForFixedUpdate();
+        }
     }
 
     private void OnNoticed()
