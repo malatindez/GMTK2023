@@ -27,6 +27,8 @@ public class CharacterMoveController : MonoBehaviour
 	{
 		var moveDirection = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
 
+
+		_target.IsWalking = moveDirection != Vector3.zero;
 		_target.MoveTo(moveDirection.normalized * Time.deltaTime);
 
 		var cameraRay = _camera.ScreenPointToRay(Input.mousePosition);
