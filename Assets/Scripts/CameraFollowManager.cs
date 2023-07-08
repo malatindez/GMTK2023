@@ -1,15 +1,18 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class CameraFolowManager : MonoBehaviour
+public class CameraFollowManager : MonoBehaviour
 {
-    [SerializeField] private Transform _cameraTransform;
-    
-    [SerializeField] private Transform _target;
     [SerializeField] private Vector3 _offset;
     [SerializeField] private float _speed = 1f;
 
+    private Transform _cameraTransform;
+    private Transform _target;
+    
+    
+    private void Start()
+    {
+        _cameraTransform = Camera.main.transform;
+    }
 
     public void ChangeTarget(Transform target)
     {
