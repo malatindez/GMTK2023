@@ -1,0 +1,16 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float> VisibilityMask;
+RWTexture2D<float> FogOfWarMask;
+
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    if (VisibilityMask[id.xy] > 0.0f && VisibilityMask[id.xy] > FogOfWarMask[id.xy])
+    {
+        FogOfWarMask[id.xy] = VisibilityMask[id.xy];
+    }
+}

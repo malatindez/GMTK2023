@@ -32,7 +32,7 @@ public class VisibilityManager : MonoBehaviour
     {
         if (numSteps <= 1 || numRaysPerDegree <= 0 || viewAngle < 0)
         {
-            Debug.LogError("Invalid parameters for visibility mask calculation");
+            Debug.LogWarning("Invalid parameters for visibility mask calculation");
             return;
         }
         Vector3 unprojectedRayOrigin = _mapCamera.WorldToViewportPoint(worldRayOrigin);
@@ -74,9 +74,9 @@ public class VisibilityManager : MonoBehaviour
         // TODO: MOVE TO COMPUTE SHADER
         if (updateFogOfWar)
         {
-            //            _fogOfWarMaskShader.SetTexture(0, "VisibilityMask", _visibilityMask);
-            //            _fogOfWarMaskShader.SetTexture(0, "FogOfWarMask", _fogOfWarMask);
-            //            _fogOfWarMaskShader.Dispatch(0, _maskWidth / 8, _maskHeight / 8, 1);
+            _fogOfWarMaskShader.SetTexture(0, "VisibilityMask", _visibilityMask);
+            _fogOfWarMaskShader.SetTexture(0, "FogOfWarMask", _fogOfWarMask);
+            _fogOfWarMaskShader.Dispatch(0, _maskWidth / 8, _maskHeight / 8, 1);
         }
         if (_debugRenderMasks)
         {
