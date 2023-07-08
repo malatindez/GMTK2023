@@ -30,6 +30,11 @@ public class VisibilityManager : MonoBehaviour
         bool updateFogOfWar = true
         )
     {
+        if (numSteps <= 1 || numRaysPerDegree <= 0 || viewAngle < 0)
+        {
+            Debug.LogError("Invalid parameters for visibility mask calculation");
+            return;
+        }
         Vector3 unprojectedRayOrigin = _mapCamera.WorldToViewportPoint(worldRayOrigin);
         Vector3 unprojectedRayDirection = _mapCamera.WorldToViewportPoint(worldRayOrigin + worldRayDirection) - unprojectedRayOrigin;
         Vector2 rayOrigin = new Vector2(unprojectedRayOrigin.x, unprojectedRayOrigin.y);

@@ -23,31 +23,36 @@ float2x2 rotate(float angle)
         sin(angle), cos(angle));
 }
 
-[numthreads(8,8,1)]
-void CSMain (uint3 id : SV_DispatchThreadID)
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
 {
-    float halfViewAngle = radians(ViewAngle) / 2.0f;
-    int numRays = ceil(ViewAngle * NumRaysPerDegree);
+    float halfViewAngle = radians(ViewAngle / 2.0f);
+    uint numRays = ceil(ViewAngle * NumRaysPerDegree);
     float angleStep = radians(ViewAngle) / (float) (numRays - 1);
 
     float2 worldPos = id.xy / float2(VisibilityMaskWidth, VisibilityMaskHeight);
     float2 toPixel = worldPos.xy - RayOrigin;
     float distance = length(toPixel.xy);
-                        
     float2 normalizedToPixel = normalize(toPixel.xy);
-    float2 normalizedRayDirection = normalize(RayDirection);
-    normalizedRayDirection = mul(rotate(-halfViewAngle), normalizedRayDirection);
-
-    float dotProduct = dot(normalizedToPixel, normalizedRayDirection);
-    float angle = acos(dotProduct);
     
-    int rayId = int(angle / angleStep);
-    if(rayId > numRays - 1)
+    if (acos(dot(normalizedToPixel, RayDirection)) > halfViewAngle)
     {
         Result[id.xy] = DepthMap[id.xy];
         return;
     }
-    int2 rayTextureCoord = int2(rayId % RayTextureSize, rayId / RayTextureSize);
+    float2 normalizedRayDirection = mul(rotate(-halfViewAngle), RayDirection);
+    normalizedRayDirection = normalize(normalizedRayDirection);
+
+    float dotProduct = dot(normalizedToPixel, normalizedRayDirection);
+    float angle = acos(dotProduct);
+    
+    uint rayId = uint(angle / angleStep);
+    if (rayId > numRays - 1)
+    {
+        Result[id.xy] = DepthMap[id.xy];
+        return;
+    }
+    uint2 rayTextureCoord = uint2(rayId % (uint) RayTextureSize, rayId / (uint) RayTextureSize);
     float furthestVisibleDistance = FurthestVisibleDistances[rayTextureCoord].r;
     
     if (distance > furthestVisibleDistance)

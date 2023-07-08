@@ -45,7 +45,7 @@ void Raymarch(inout float t, float2 rayOrigin, float2 direction, float dt)
 [numthreads(64, 1, 1)]
 void VisibilityCone (uint3 id : SV_DispatchThreadID)
 {
-    float halfViewAngle = radians(ViewAngle) / 2.0f;
+    float halfViewAngle = radians(ViewAngle / 2.0f);
     int numRays = ceil(ViewAngle * NumRaysPerDegree);
     float angleStep = radians(ViewAngle) / (float) (numRays - 1);
 
