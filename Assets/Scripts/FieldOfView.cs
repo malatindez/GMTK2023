@@ -10,7 +10,7 @@ public class FieldOfView : MonoBehaviour
     [SerializeField] private LayerMask _targetMask;
     [SerializeField] private LayerMask _obstructionMask;
 
-    public bool CanSeePlayer { get; private set; }
+    public bool CanSeeTarget => Target != null;
 
     public GameObject Target { get; private set; }
 
@@ -49,22 +49,20 @@ public class FieldOfView : MonoBehaviour
                 if (!Physics.Raycast(transform.position, directionToTarget, distanceToTarget, _obstructionMask))
                 {
                     Target = target.gameObject;
-
-                    CanSeePlayer = true;
                 }
                 else
                 {
-                    CanSeePlayer = false;
+                    Target = null;
                 }
             }
             else
             {
-                CanSeePlayer = false;
+                Target = null;
             }
         }
-        else if (CanSeePlayer)
+        else if (Target != null)
         {
-            CanSeePlayer = false;
+            Target = null;
         }
     }
 }
