@@ -15,6 +15,7 @@ int NumRaysPerDegree;
 int RayTextureSize;
 int VisibilityMaskWidth;
 int VisibilityMaskHeight;
+float MinAlpha;
 
 float2x2 rotate(float angle)
 {
@@ -22,7 +23,6 @@ float2x2 rotate(float angle)
         cos(angle), -sin(angle),
         sin(angle), cos(angle));
 }
-
 [numthreads(8, 8, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
 {
@@ -37,7 +37,10 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     
     if (acos(dot(normalizedToPixel, RayDirection)) > halfViewAngle)
     {
+        Result[id.xy] = 0;
+#ifdef DEBUG_SHADER
         Result[id.xy] = DepthMap[id.xy];
+#endif
         return;
     }
     float2 normalizedRayDirection = mul(rotate(-halfViewAngle), RayDirection);
@@ -49,7 +52,10 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     uint rayId = uint(angle / angleStep);
     if (rayId > numRays - 1)
     {
+        Result[id.xy] = 0;
+#ifdef DEBUG_SHADER
         Result[id.xy] = DepthMap[id.xy];
+#endif
         return;
     }
     uint2 rayTextureCoord = uint2(rayId % (uint) RayTextureSize, rayId / (uint) RayTextureSize);
@@ -57,8 +63,17 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     
     if (distance > furthestVisibleDistance)
     {
+        Result[id.xy] = 0;
+#ifdef DEBUG_SHADER
         Result[id.xy] = DepthMap[id.xy];
+#endif
         return;
     }
-    Result[id.xy] = furthestVisibleDistance;
+    Result[id.xy] = lerp(MinAlpha, 1.0f,
+        (
+            dot(normalizedToPixel, RayDirection) - cos(halfViewAngle)
+        ) / ( // -------------------------------
+                    1.0f - cos(halfViewAngle)
+        )
+    );
 }

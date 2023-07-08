@@ -69,6 +69,7 @@ public class VisibilityManager : MonoBehaviour
         _visibilityMaskShader.SetInt("RayTextureSize", _rayTextureSize);
         _visibilityMaskShader.SetInt("VisibilityMaskWidth", _visibilityMask.width);
         _visibilityMaskShader.SetInt("VisibilityMaskHeight", _visibilityMask.height);
+        _visibilityMaskShader.SetFloat("MinAlpha", _minAlpha);
         _visibilityMaskShader.Dispatch(0, _visibilityMask.width / 8, _visibilityMask.height / 8, 1);
         // TODO: MOVE TO COMPUTE SHADER
         if (updateFogOfWar)
@@ -110,6 +111,7 @@ public class VisibilityManager : MonoBehaviour
     private RenderTexture _visibilityMask;
     [SerializeField] private ComputeShader _visibilityMaskShader;
     [SerializeField] private ComputeShader _R8ToR8G8B8A8TransferShader;
+    [SerializeField] private float _minAlpha = 0.5f;
 
     #endregion Fields
 
