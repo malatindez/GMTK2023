@@ -56,7 +56,6 @@ public class EnemyAI : MonoBehaviour
         {
             if (_fieldOfView.CanSeeTarget)
             {
-                Debug.Log("_fieldOfView.CanSeeTarget");
                 OnNoticed();
                 _isPlayerNoticed = true;
                 _target = _fieldOfView.Target;
