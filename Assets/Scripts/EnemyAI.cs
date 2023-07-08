@@ -18,6 +18,7 @@ public class EnemyAI : MonoBehaviour
     private FieldOfView _fieldOfView;
     private bool _isPlayerNoticed;
     private GameObject _target;
+    private PlayerV2 _currentOwner;
 
     private Queue<PatrolPoint> _points;
     private PatrolPoint _currentPoint;
@@ -28,6 +29,8 @@ public class EnemyAI : MonoBehaviour
         set => _animator.SetBool(nameof(IsWalking), value);
     }
 
+    public bool IsUnderControl { get; private set; }
+
     private void Start()
     {
         _animator = GetComponent<Animator>();
@@ -37,17 +40,63 @@ public class EnemyAI : MonoBehaviour
         StartCoroutine(Patrol());
     }
 
-    public void StartTelepaty()
+    public void StartTelepaty(PlayerV2 owner)
     {
         StopAllCoroutines();
+        IsWalking = false;
+        IsUnderControl = true;
+        _currentPoint = null;
 
-        // TODO: ...
+        _currentOwner = owner;
+        StartCoroutine(Control());
     }
 
     public void StopTelepaty()
     {
         StopAllCoroutines();
         StartCoroutine(Patrol());
+        IsUnderControl = false;
+
+        _currentOwner.EndTelepaty();
+    }
+
+    private IEnumerator Control()
+    {
+        while (true)
+        {
+            if (Input.GetKeyDown(KeyCode.Q))
+            {
+                StopTelepaty();
+                yield break;
+            }
+
+            Move();
+
+            yield return null;
+        }
+    }
+
+    private void Move()
+    {
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        float vertical = Input.GetAxisRaw("Vertical");
+
+        //camera forward and right vectors:
+        var forward = Camera.main.transform.forward;
+        var right = Camera.main.transform.right;
+
+        //project forward and right vectors on the horizontal plane (y = 0)
+        forward.y = 0f;
+        right.y = 0f;
+        forward.Normalize();
+        right.Normalize();
+
+        //this is the direction in the world space we want to move:
+        var desiredMoveDirection = forward * vertical + right * horizontal;
+
+        var dir = transform.position + desiredMoveDirection * 2;
+        _agent.SetDestination(dir);
+        IsWalking = horizontal > 0f || vertical > 0f;
     }
 
     private IEnumerator Patrol()
@@ -92,9 +141,14 @@ public class EnemyAI : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.collider.gameObject.TryGetComponent(out Player player))
+        if (collision.collider.gameObject.TryGetComponent(out PlayerV2 player))
         {
             player.TryKill();
+            StopAllCoroutines();
+            IsWalking = false;
+
+            _agent.enabled = false;
+            //_agent.SetDestination(transform.position);
         }
     }
 

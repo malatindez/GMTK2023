@@ -6,7 +6,7 @@ public class DeathField : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.TryGetComponent(out Player player))
+        if (other.gameObject.TryGetComponent(out PlayerV2 player))
         {
             player.TryKill();
         }

@@ -1664,7 +1664,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.z
-    path: Mesh Object/Bone_Leg_L
+    path: Mesh Object/Bone_Body
     classID: 4
     script: {fileID: 0}
     flags: 0
@@ -1676,7 +1676,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.y
-    path: Mesh Object/Bone_Leg_L
+    path: Mesh Object/Bone_Body
     classID: 4
     script: {fileID: 0}
     flags: 0
@@ -1688,7 +1688,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.x
-    path: Mesh Object/Bone_Leg_L
+    path: Mesh Object/Bone_Body
     classID: 4
     script: {fileID: 0}
     flags: 0
@@ -1700,7 +1700,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.z
-    path: Mesh Object/Bone_Body
+    path: Mesh Object/Bone_Leg_L
     classID: 4
     script: {fileID: 0}
     flags: 0
@@ -1712,7 +1712,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.y
-    path: Mesh Object/Bone_Body
+    path: Mesh Object/Bone_Leg_L
     classID: 4
     script: {fileID: 0}
     flags: 0
@@ -1724,7 +1724,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.x
-    path: Mesh Object/Bone_Body
+    path: Mesh Object/Bone_Leg_L
     classID: 4
     script: {fileID: 0}
     flags: 0
