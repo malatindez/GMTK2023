@@ -18,7 +18,6 @@ public class EnemyAI : MonoBehaviour
     private FieldOfView _fieldOfView;
     private bool _isPlayerNoticed;
     private GameObject _target;
-    private PlayerV2 _currentOwner;
 
     private Queue<PatrolPoint> _points;
     private PatrolPoint _currentPoint;
@@ -105,14 +104,14 @@ public class EnemyAI : MonoBehaviour
             IsWalking = false;
 
             _agent.enabled = false;
-            //_agent.SetDestination(transform.position);
+            _agent.SetDestination(transform.position);
         }
     }
 
     private bool ComparePoints(Vector3 left, Vector3 right)
     {
-        Vector2 a = new Vector2(left.x, left.z);
-        Vector2 b = new Vector2(right.x, right.z);
+        var a = new Vector2(left.x, left.z);
+        var b = new Vector2(right.x, right.z);
 
         return Vector2.Distance(a, b) < 0.1f;
     }

@@ -8,7 +8,6 @@ public class Character : MonoBehaviour
 	[SerializeField, Min(0)] private float _rotationSpeed = 1;
 
 	protected CharacterController _characterController;
-	private Rigidbody _rigidbody;
 	private Transform _transform;
 	private Animator _animator;
 	
@@ -21,7 +20,6 @@ public class Character : MonoBehaviour
 	private void Start()
 	{
 		_characterController = GetComponent<CharacterController>();
-		_rigidbody = GetComponent<Rigidbody>();
 		_animator = GetComponent<Animator>();
 		_transform = transform;
 	}
@@ -38,6 +36,5 @@ public class Character : MonoBehaviour
 	public void MoveTo(Vector3 direction)
 	{
 		_characterController.Move(direction * _speed);
-		//IsWalking = _rigidbody.velocity != Vector3.zero;
 	}
 }
