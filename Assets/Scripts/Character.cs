@@ -16,7 +16,7 @@ public class Character : MonoBehaviour
 		set => _animator.SetBool(nameof(IsWalking), value);
 	}
 
-	private void Start()
+	private void Awake()
 	{
 		_characterController = GetComponent<CharacterController>();
 		_animator = GetComponent<Animator>();
