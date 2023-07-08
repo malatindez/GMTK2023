@@ -37,6 +37,19 @@ public class EnemyAI : MonoBehaviour
         StartCoroutine(Patrol());
     }
 
+    public void StartTelepaty()
+    {
+        StopAllCoroutines();
+
+        // TODO: ...
+    }
+
+    public void StopTelepaty()
+    {
+        StopAllCoroutines();
+        StartCoroutine(Patrol());
+    }
+
     private IEnumerator Patrol()
     {
         while (true)
