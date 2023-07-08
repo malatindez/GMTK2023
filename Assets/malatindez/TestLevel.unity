@@ -1171,12 +1171,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db4f064d4ab260e40a3d62d74fc800fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  drawDebugRays: 1
+  visibilityManager: {fileID: 2130491494}
   numRaysPerDegree: 30
   numSteps: 1024
   viewAngle: 90
   viewDistance: 10
-  visibilityManager: {fileID: 2130491494}
 --- !u!1 &412628613 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6889676053574524597, guid: 1244a9e4f6193654989497ad418a287b,
@@ -4696,4 +4695,5 @@ MonoBehaviour:
     type: 3}
   _visibiltyMaskShader: {fileID: 4800000, guid: 0e7003acf955d7447941a11a97941114,
     type: 3}
+  _R8ToR8G8B8A8TransferShader: {fileID: 0}
   _debugRenderMasks: 1

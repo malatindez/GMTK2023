@@ -54,7 +54,6 @@ public class VisibilityManager : MonoBehaviour
         _visibilityMaskMaterial.SetFloat("ViewDistance", viewDistance);
         _visibilityMaskMaterial.SetInt("NumRaysPerDegree", numRaysPerDegree);
         _visibilityMaskMaterial.SetInt("RayTextureSize", _rayTextureSize);
-        // call VisibilityMaskShader to draw to _visibilityMask
         Graphics.Blit(null, _visibilityMask, _visibilityMaskMaterial);
         if (updateFogOfWar)
         {
@@ -91,24 +90,36 @@ public class VisibilityManager : MonoBehaviour
     private RenderTexture _visibilityMask;
     private Material _visibilityMaskMaterial;
     [SerializeField] private Shader _visibiltyMaskShader;
+    [SerializeField] private ComputeShader _R8ToR8G8B8A8TransferShader;
 
     #endregion Fields
 
     #region Debug
     public Texture2D RenderTextureToTexture2DR8(RenderTexture renderTexture)
     {
-        return new(renderTexture.width, renderTexture.height);
-        Texture2D texture = new(renderTexture.width, renderTexture.height, TextureFormat.R8, false);
+        Texture2D tempTexture = new(renderTexture.width, renderTexture.height, TextureFormat.RGBA32, false);
+
+        ComputeBuffer buffer = new(renderTexture.width * renderTexture.height * 4, sizeof(float));
+
         RenderTexture.active = renderTexture;
-        texture.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
-        texture.Apply();
+        _R8ToR8G8B8A8TransferShader.SetInt("Width", renderTexture.width);
+        _R8ToR8G8B8A8TransferShader.SetTexture(0, "Input", renderTexture);
+        _R8ToR8G8B8A8TransferShader.SetBuffer(0, "Result", buffer);
+        _R8ToR8G8B8A8TransferShader.Dispatch(0, renderTexture.width / 8, renderTexture.height / 8, 1);
+
+        Color[] colors = new Color[renderTexture.width * renderTexture.height];
+        buffer.GetData(colors);
+        tempTexture.SetPixels(colors);
+        tempTexture.Apply();
+
+        buffer.Release();
+
         RenderTexture.active = null;
-        return texture;
-        Texture2D rgbTex = new(texture.width, texture.height, TextureFormat.RGB24, false);
-        rgbTex.SetPixels(texture.GetPixels());
-        rgbTex.Apply();
-        return rgbTex;
+
+        return tempTexture;
     }
+
+
     public Texture2D RenderTextureToTexture2DR32F(RenderTexture renderTexture)
     {
         Texture2D texture = new(renderTexture.width, renderTexture.height, TextureFormat.RFloat, false);
@@ -122,7 +133,7 @@ public class VisibilityManager : MonoBehaviour
             for (int x = 0; x < texture.width; x++)
             {
                 float rFloatValue = texture.GetPixel(x, y).r;
-                rgbTex.SetPixel(x, y, new Color(rFloatValue / 20, rFloatValue / 20, rFloatValue / 20));
+                rgbTex.SetPixel(x, y, new Color(rFloatValue / 10, rFloatValue / 10, rFloatValue / 10));
             }
         }
         rgbTex.Apply();

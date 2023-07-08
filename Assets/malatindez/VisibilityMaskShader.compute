@@ -1,44 +1,11 @@
-Shader "Unlit/VisibilityMaskShader"
-{
-    Properties
-    {
-        _FurthestVisibleDistances ("FurthestVisibleDistances", 2D) = "white" {}
-        _Color ("Color", Color) = (1,1,1,1) 
-    }
-    SubShader
-    {
-        // No culling or depth
-Cull Off
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
 
-ZWrite Off
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
 
-ZTest Always
-
-        Pass
-        {
-            CGPROGRAM
-            #pragma vertex vert
-            #pragma fragment frag
-
-#include "UnityCG.cginc"
-
-struct appdata
-{
-    float4 vertex : POSITION;
-    float2 uv : TEXCOORD0;
-};
-
-struct v2f
-{
-    float2 uv : TEXCOORD0;
-    float4 vertex : SV_POSITION;
-    float4 worldPos : TEXCOORD1;
-};
-
-sampler2D _FurthestVisibleDistances;
-float4 _Color;
-float _ViewDistance;
-            
+RWTexture2D<float> FurthestVisibleDistances;
+RWTexture2D<uint> Result;
 float2 RayOrigin;
 float2 RayDirection;
 float ViewAngle;
@@ -46,16 +13,8 @@ float ViewDistance;
 int NumRaysPerDegree;
 int RayTextureSize;
 
-v2f vert(appdata v)
-{
-    v2f o;
-    o.vertex = UnityObjectToClipPos(v.vertex);
-    o.uv = v.uv;
-    o.worldPos = mul(unity_ObjectToWorld, v.vertex);
-    return o;
-}
-
-fixed frag(v2f i) : SV_Target
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
 {
     float halfViewAngle = ViewAngle / 2.0f;
     int numRays = ceil(ViewAngle * NumRaysPerDegree);
@@ -79,13 +38,9 @@ fixed frag(v2f i) : SV_Target
                         
     if (distance > furthestVisibleDistance)
     {
-        return 0.5f;
+        return 127;
     }
 
-    float col = lerp(0.0f, 0.5f, distance / _ViewDistance);
-    return col;
-}
-            ENDCG
-        }
-    }
+    uint col = lerp(0.0f, 0.5f, distance / _ViewDistance) * 255;
+    Result[id.xy] = col;
 }

@@ -24,6 +24,9 @@ void Raymarch(inout float t, float2 rayOrigin, float2 direction, float dt)
     for(int i = 0; i < NumSteps; i++) {
         float2 currentPos = rayOrigin + direction * t;
         float2 texPos = currentPos.xy;
+        if(texPos.x < 0.0 || texPos.x > 1.0 || texPos.y < 0.0 || texPos.y > 1.0) {
+            break;
+        }
 
         // Sample the depth map
         float depth = MapDepthTexture.Load(int3(texPos, 0)).r;
@@ -49,7 +52,6 @@ void VisibilityCone (uint3 id : SV_DispatchThreadID)
     float angle = -halfViewAngle + id.x * angleStep;
     float2 direction = mul(rotate(angle), RayDirection);
     float2 rayOrigin = RayOrigin;
-    float2 rayEnd = rayOrigin + direction * ViewDistance;
     
     direction = normalize(direction);
 
@@ -67,5 +69,8 @@ void VisibilityCone (uint3 id : SV_DispatchThreadID)
     int x = id.x % RayTextureSize;
     int y = id.x / RayTextureSize;
     int2 texCoord = int2(x,y);
+    if(x > RayTextureSize || y > RayTextureSize) {
+        return;
+    }
     FurthestVisibleDistances[texCoord] = t;
 }
