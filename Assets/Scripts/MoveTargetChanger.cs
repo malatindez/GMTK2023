@@ -1,13 +1,19 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class MoveTargetChanger : MonoBehaviour
 {
 	[SerializeField] private CharacterMoveController _characterMoveController;
-	[SerializeField] private Player _player;
+
+	private Player _player;
+	private Camera _camera;
 
 	
+	private void Start()
+	{
+		_player = PlayerProvider.Instance.GetPlayer;
+		_camera = Camera.main;
+	}
+
 	private void Update()
 	{
 		if (Input.GetMouseButtonDown(0))
@@ -28,16 +34,14 @@ public class MoveTargetChanger : MonoBehaviour
 	{
 		target = default;
 
-		bool WithinRange(Transform transform)
-			=> Vector3.Distance(transform.position, _player.transform.position) <= _player.MaxPerceptionShiftRange;
+		bool WithinRange(Transform characterTransform)
+			=> Vector3.Distance(characterTransform.position, _player.transform.position) <= _player.MaxPerceptionShiftRange;
 
-		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+		var ray = _camera.ScreenPointToRay(Input.mousePosition);
 
 		if (Physics.Raycast(ray, out var hit) && WithinRange(hit.transform))
 			return hit.collider.TryGetComponent<Enemy>(out target);
 		
 		return false;
 	}
-	
-	
 }

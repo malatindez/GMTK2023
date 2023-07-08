@@ -174,6 +174,5 @@ public class EnemyAI : MonoBehaviour
     {
         _animator.SetTrigger("PlayerNoticed");
         _noticeFx.SetActive(true);
-
     }
 }

@@ -19,8 +19,9 @@ public class Character : MonoBehaviour
 
 	public void LookAt(Vector3 point)
 	{
-		Quaternion targetRotation = Quaternion.LookRotation(
-			new Vector3(point.x, _transform.position.y, point.z) - _transform.position);
+		var position = _transform.position;
+		var targetRotation = Quaternion.LookRotation(
+			new Vector3(point.x, position.y, point.z) - position);
 
 		_transform.rotation = Quaternion.Slerp(_transform.rotation, targetRotation, _rotationSpeed * Time.deltaTime);
 	}

@@ -1,37 +1,35 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(CameraFolowManager))]
+[RequireComponent(typeof(CameraFollowManager))]
 public class CharacterMoveController : MonoBehaviour
 {
-	[SerializeField] private Player _player;
-
-	private CameraFolowManager _cameraFolowManager;
+	private CameraFollowManager _cameraFollowManager;
 	private Character _target;
+	private Camera _camera;
 
 	public Character Target => _target;
 	
-    
+	
 	private void Start()
 	{
-		_cameraFolowManager = GetComponent<CameraFolowManager>();
-		_target = _player;
+		_cameraFollowManager = GetComponent<CameraFollowManager>();
+		ChangeTarget(PlayerProvider.Instance.GetPlayer);
+		_camera = Camera.main;
 	}
 
 	public void ChangeTarget(Character target)
 	{
 		_target = target;
-		_cameraFolowManager.ChangeTarget(target.transform);
+		_cameraFollowManager.ChangeTarget(target.transform);
 	}
 
 	private void Update()
 	{
-		Vector3 moveDirection = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+		var moveDirection = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
 
 		_target.MoveTo(moveDirection.normalized * Time.deltaTime);
 
-		var cameraRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+		var cameraRay = _camera.ScreenPointToRay(Input.mousePosition);
 		var groundPlane = new Plane(Vector3.up, Vector3.zero);
 
 		if (groundPlane.Raycast(cameraRay, out var rayLength))
