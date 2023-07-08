@@ -11,6 +11,7 @@ using UnityEngine.PlayerLoop;
 public class EnemyAI : MonoBehaviour
 {
     [SerializeField] private PatrolPoint[] _patrolPoints;
+    [SerializeField] private GameObject _noticeFx; 
 
     private Animator _animator;
     private NavMeshAgent _agent;
@@ -46,7 +47,7 @@ public class EnemyAI : MonoBehaviour
                 OnNoticed();
                 _isPlayerNoticed = true;
                 _target = _fieldOfView.Target;
-                yield return new WaitForSeconds(0.8f);
+                yield return new WaitForSeconds(1f);
                 _agent.SetDestination(_target.transform.position);
                 StartCoroutine(Hunt());
 
@@ -94,5 +95,7 @@ public class EnemyAI : MonoBehaviour
     private void OnNoticed()
     {
         _animator.SetTrigger("PlayerNoticed");
+        _noticeFx.SetActive(true);
+
     }
 }
