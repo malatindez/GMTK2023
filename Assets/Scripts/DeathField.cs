@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class DeathField : MonoBehaviour
 {
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider other)
     {
-        if (collision.collider.gameObject.TryGetComponent(out Player player))
+        if (other.gameObject.TryGetComponent(out Player player))
         {
             player.TryKill();
         }

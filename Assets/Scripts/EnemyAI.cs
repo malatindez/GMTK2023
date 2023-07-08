@@ -98,7 +98,7 @@ public class EnemyAI : MonoBehaviour
     {
         while (true)
         {
-            Debug.Log("TODO: ADD LOGIC");
+            _agent.SetDestination(_target.transform.position);
 
             yield return new WaitForFixedUpdate();
         }
