@@ -18,7 +18,6 @@ public class EnemyAI : MonoBehaviour
     private FieldOfView _fieldOfView;
     private bool _isPlayerNoticed;
     private GameObject _target;
-    private PlayerV2 _currentOwner;
 
     private Queue<PatrolPoint> _points;
     private PatrolPoint _currentPoint;
@@ -40,64 +39,21 @@ public class EnemyAI : MonoBehaviour
         StartCoroutine(Patrol());
     }
 
-    public void StartTelepaty(PlayerV2 owner)
+    public void Disable()
     {
         StopAllCoroutines();
         IsWalking = false;
         IsUnderControl = true;
         _currentPoint = null;
-
-        _currentOwner = owner;
-        StartCoroutine(Control());
     }
 
-    public void StopTelepaty()
+    public void Enable()
     {
         StopAllCoroutines();
         StartCoroutine(Patrol());
         IsUnderControl = false;
-
-        _currentOwner.EndTelepaty();
     }
-
-    private IEnumerator Control()
-    {
-        while (true)
-        {
-            if (Input.GetKeyDown(KeyCode.Q))
-            {
-                StopTelepaty();
-                yield break;
-            }
-
-            Move();
-
-            yield return null;
-        }
-    }
-
-    private void Move()
-    {
-        float horizontal = Input.GetAxisRaw("Horizontal");
-        float vertical = Input.GetAxisRaw("Vertical");
-
-        //camera forward and right vectors:
-        var forward = Camera.main.transform.forward;
-        var right = Camera.main.transform.right;
-
-        //project forward and right vectors on the horizontal plane (y = 0)
-        forward.y = 0f;
-        right.y = 0f;
-        forward.Normalize();
-        right.Normalize();
-
-        //this is the direction in the world space we want to move:
-        var desiredMoveDirection = forward * vertical + right * horizontal;
-
-        var dir = transform.position + desiredMoveDirection * 2;
-        _agent.SetDestination(dir);
-        IsWalking = horizontal > 0f || vertical > 0f;
-    }
+    
 
     private IEnumerator Patrol()
     {
@@ -124,7 +80,7 @@ public class EnemyAI : MonoBehaviour
                 IsWalking = true;
             }
 
-            if (ComaprePoints(transform.position, _currentPoint.transform.position))
+            if (ComparePoints(transform.position, _currentPoint.transform.position))
             {
                 if (_currentPoint.Delay > 0)
                 {
@@ -141,21 +97,21 @@ public class EnemyAI : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.collider.gameObject.TryGetComponent(out PlayerV2 player))
+        if (collision.collider.gameObject.TryGetComponent(out Player player))
         {
             player.TryKill();
             StopAllCoroutines();
             IsWalking = false;
 
             _agent.enabled = false;
-            //_agent.SetDestination(transform.position);
+            _agent.SetDestination(transform.position);
         }
     }
 
-    private bool ComaprePoints(Vector3 left, Vector3 right)
+    private bool ComparePoints(Vector3 left, Vector3 right)
     {
-        Vector2 a = new Vector2(left.x, left.z);
-        Vector2 b = new Vector2(right.x, right.z);
+        var a = new Vector2(left.x, left.z);
+        var b = new Vector2(right.x, right.z);
 
         return Vector2.Distance(a, b) < 0.1f;
     }

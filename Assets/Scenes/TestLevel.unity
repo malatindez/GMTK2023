@@ -1109,13 +1109,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 406406557}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fd1d625192793f647b25b29f158641d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _speed: 10
-  _rotationSpeed: 1
+  _speed: 5
+  _rotationSpeed: 10
   _maxPerceptionShiftRange: 5
 --- !u!54 &406406559
 Rigidbody:
@@ -1196,23 +1196,32 @@ AudioListener:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 406406557}
   m_Enabled: 1
---- !u!114 &406406567
-MonoBehaviour:
+--- !u!143 &406406568
+CharacterController:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 406406557}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3ee312669524032409923f30d9304be6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _controlRange: 6
-  _moveSpeed: 6
-  _clickTargets:
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 512
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Height: 2
+  m_Radius: 0.5
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &412628613 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6889676053574524597, guid: 1244a9e4f6193654989497ad418a287b,
@@ -1539,6 +1548,11 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 406406558}
+      addedObject: {fileID: 406406558}
+    - targetCorrespondingSourceObject: {fileID: 3855948662225289030, guid: 6f5cb1003ab50aa4b9bc26bc9ca47159,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 406406568}
   m_SourcePrefab: {fileID: 100100000, guid: 6f5cb1003ab50aa4b9bc26bc9ca47159, type: 3}
 --- !u!1001 &612920307
 PrefabInstance:
@@ -1945,11 +1959,19 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1354981338223064, guid: 8c2834b24c6868241a411d67241aa8e8,
         type: 3}
       insertIndex: -1
+      addedObject: {fileID: 1229560185}
+    - targetCorrespondingSourceObject: {fileID: 1354981338223064, guid: 8c2834b24c6868241a411d67241aa8e8,
+        type: 3}
+      insertIndex: -1
       addedObject: {fileID: 1229560179}
     - targetCorrespondingSourceObject: {fileID: 1354981338223064, guid: 8c2834b24c6868241a411d67241aa8e8,
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1229560182}
+    - targetCorrespondingSourceObject: {fileID: 1354981338223064, guid: 8c2834b24c6868241a411d67241aa8e8,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1229560186}
   m_SourcePrefab: {fileID: 100100000, guid: 8c2834b24c6868241a411d67241aa8e8, type: 3}
 --- !u!1 &745912971
 GameObject:
@@ -2971,6 +2993,47 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1229560185
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1229560175}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e057769d9f2f314d8cbc79d0c1be608, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _speed: 4
+  _rotationSpeed: 10
+  _enemyAI: {fileID: 1229560179}
+--- !u!143 &1229560186
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1229560175}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Height: 2
+  m_Radius: 0.5
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1231731418
 GameObject:
   m_ObjectHideFlags: 0
@@ -3165,6 +3228,10 @@ PrefabInstance:
     - target: {fileID: 1915620986865270, guid: fe64962353630324cbfb66d67b5fd3e4, type: 3}
       propertyPath: m_Layer
       value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 1915620986865270, guid: fe64962353630324cbfb66d67b5fd3e4, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4940499698117822, guid: fe64962353630324cbfb66d67b5fd3e4, type: 3}
       propertyPath: m_RootOrder

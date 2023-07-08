@@ -7,13 +7,20 @@ public class Character : MonoBehaviour
 	[SerializeField, Min(0)] private float _speed = 10;
 	[SerializeField, Min(0)] private float _rotationSpeed = 1;
 
-	private CharacterController _characterController;
+	protected CharacterController _characterController;
 	private Transform _transform;
-
+	private Animator _animator;
+	
+	public bool IsWalking
+	{
+		get => _animator.GetBool(nameof(IsWalking));
+		set => _animator.SetBool(nameof(IsWalking), value);
+	}
 
 	private void Start()
 	{
 		_characterController = GetComponent<CharacterController>();
+		_animator = GetComponent<Animator>();
 		_transform = transform;
 	}
 
