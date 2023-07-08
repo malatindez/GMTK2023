@@ -75,7 +75,7 @@ public class PlayerV2 : MonoBehaviour
                     if (hit.collider.TryGetComponent(out EnemyAI enemyAI))
                     {
                         StopAllCoroutines();
-                        enemyAI.StartTelepaty(this);
+                        //enemyAI.StartTelepaty(this);
                     }
                 }
                 
