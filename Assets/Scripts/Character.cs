@@ -1,7 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(CharacterController))]
 public class Character : MonoBehaviour
 {
 	[SerializeField, Min(0)] private float _speed = 10;
