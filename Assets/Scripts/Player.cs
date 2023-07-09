@@ -22,7 +22,6 @@ public class Player : Character
 
 	private IEnumerator Kill()
 	{
-		Time.timeScale = 0f;
 		DeathScreen.Instance.Show();
         yield return new WaitForSecondsRealtime(2f);
         Time.timeScale = 1f;

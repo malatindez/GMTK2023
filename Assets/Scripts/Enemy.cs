@@ -12,13 +12,13 @@ public class Enemy : Character
 	
 	public void StartTelepathy()
 	{
-		_enemyAI.Disable();
+		//_enemyAI.Disable();
 		_characterController.enabled = true;
 	}
 
 	public void StopTelepathy()
 	{
 		_characterController.enabled = false;
-		_enemyAI.Enable();
+		//_enemyAI.Enable();
 	}
 }

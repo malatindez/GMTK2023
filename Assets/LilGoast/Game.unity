@@ -8964,7 +8964,7 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 0c0f82088b0c6c84f93883e1eeb91b33,
         type: 3}
       propertyPath: m_Name
-      value: SM_JailWall_01a (1)
+      value: Gate 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -9193,10 +9193,20 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 4413484292260870960, guid: 5f03290c2df89c145a4ac75bedc8c982,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4416827924053452057, guid: 5f03290c2df89c145a4ac75bedc8c982,
         type: 3}
       propertyPath: m_Constraints
-      value: 116
+      value: 112
+      objectReference: {fileID: 0}
+    - target: {fileID: 4922197884612890884, guid: 5f03290c2df89c145a4ac75bedc8c982,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6495491880183010333, guid: 5f03290c2df89c145a4ac75bedc8c982,
         type: 3}
@@ -9261,7 +9271,11 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2116883137927991185, guid: 5f03290c2df89c145a4ac75bedc8c982,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2078071922}
   m_SourcePrefab: {fileID: 100100000, guid: 5f03290c2df89c145a4ac75bedc8c982, type: 3}
 --- !u!1001 &316875116
 PrefabInstance:
@@ -11728,6 +11742,7 @@ GameObject:
   - component: {fileID: 426241529}
   - component: {fileID: 426241528}
   - component: {fileID: 426241530}
+  - component: {fileID: 426241531}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -11845,6 +11860,20 @@ MonoBehaviour:
     mipBias: 0
     varianceClampScale: 0.9
     contrastAdaptiveSharpening: 0
+--- !u!114 &426241531
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 426241526}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eec4bceae98dd6a40933c72dc160d903, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _target: {fileID: 2078071921}
+  _smoothTime: 0.3
 --- !u!1001 &426731572
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -17490,6 +17519,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 885857376}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 99f8eb7ed95c18f4cbfa6a2539c2af74,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 885857377}
   m_SourcePrefab: {fileID: 100100000, guid: 99f8eb7ed95c18f4cbfa6a2539c2af74, type: 3}
 --- !u!4 &626510637 stripped
 Transform:
@@ -18047,6 +18080,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 998301157}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 99f8eb7ed95c18f4cbfa6a2539c2af74,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 998301158}
   m_SourcePrefab: {fileID: 100100000, guid: 99f8eb7ed95c18f4cbfa6a2539c2af74, type: 3}
 --- !u!4 &632795685 stripped
 Transform:
@@ -19430,7 +19467,7 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 0c0f82088b0c6c84f93883e1eeb91b33,
         type: 3}
       propertyPath: m_Name
-      value: SM_JailWall_01a
+      value: Gate 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -19444,6 +19481,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1870612469}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 0c0f82088b0c6c84f93883e1eeb91b33,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1870612470}
   m_SourcePrefab: {fileID: 100100000, guid: 0c0f82088b0c6c84f93883e1eeb91b33, type: 3}
 --- !u!4 &674863175 stripped
 Transform:
@@ -20035,9 +20076,7 @@ MonoBehaviour:
   _terminalAccess: 1
   _doors: []
   _walls:
-  - {fileID: 2072500507}
-  - {fileID: 998301156}
-  - {fileID: 885857375}
+  - {fileID: 1870612470}
   _prefab: {fileID: 2286018973303779434, guid: def20798ebb384443988eb225eac5108, type: 3}
   _header: Ahahahah
   _text: Ne ahhaha
@@ -25430,7 +25469,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 885857374}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8b3b64524de930f45a09450cc5236718, type: 3}
   m_Name: 
@@ -25457,6 +25496,27 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.017317021, y: 0.17342745, z: 1.4542922}
   m_Center: {x: -0.019221812, y: 0.08749213, z: 0.360059}
+--- !u!95 &885857377
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 885857374}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1001 &886420493
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -28140,6 +28200,27 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 0, z: 1}
   m_Center: {x: 0, y: 1.9523624, z: 0}
+--- !u!95 &998301158
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 998301155}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1001 &999845791
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -29567,7 +29648,7 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 0c0f82088b0c6c84f93883e1eeb91b33,
         type: 3}
       propertyPath: m_Name
-      value: SM_JailWall_01a (2)
+      value: Gate 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -38982,6 +39063,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: CharactersController
+      objectReference: {fileID: 0}
+    - target: {fileID: 7914640718018172437, guid: 522aad787497f214b87381634111922d,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8934511188692041992, guid: 522aad787497f214b87381634111922d,
         type: 3}
@@ -51611,8 +51697,8 @@ MonoBehaviour:
     type: 3}
   m_PrefabInstance: {fileID: 315086590}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
+  m_GameObject: {fileID: 2078071914}
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fd1d625192793f647b25b29f158641d4, type: 3}
   m_Name: 
@@ -51876,6 +51962,19 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1870612470
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1870612466}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b3b64524de930f45a09450cc5236718, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  AutoCloseTime: 0
 --- !u!1001 &1872726130
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -55527,6 +55626,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 2072500508}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 99f8eb7ed95c18f4cbfa6a2539c2af74,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2072500509}
   m_SourcePrefab: {fileID: 100100000, guid: 99f8eb7ed95c18f4cbfa6a2539c2af74, type: 3}
 --- !u!4 &1991990277 stripped
 Transform:
@@ -58394,6 +58497,27 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 0, z: 1}
   m_Center: {x: 0, y: 1.8313512, z: 0}
+--- !u!95 &2072500509
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2072500506}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1001 &2072829167
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -58605,6 +58729,35 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.08, y: 0.08, z: 0.14}
   m_Center: {x: -0.03000024, y: 0.040000007, z: 0.06}
+--- !u!1 &2078071914 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2116883137927991185, guid: 5f03290c2df89c145a4ac75bedc8c982,
+    type: 3}
+  m_PrefabInstance: {fileID: 315086590}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &2078071921 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6495491880183010333, guid: 5f03290c2df89c145a4ac75bedc8c982,
+    type: 3}
+  m_PrefabInstance: {fileID: 315086590}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2078071922
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2078071914}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95b4c959b42732e4894bf6d91f4768fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _controlRange: 6
+  _moveSpeed: 6
+  _clickTargets:
+    serializedVersion: 2
+    m_Bits: 512
 --- !u!1001 &2079265139
 PrefabInstance:
   m_ObjectHideFlags: 0
