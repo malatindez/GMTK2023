@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 6045161529237845779}
   - component: {fileID: 1980948029760862953}
   - component: {fileID: 4748668731122051059}
+  - component: {fileID: 7620058010574767347}
   m_Layer: 9
   m_Name: Enemy
   m_TagString: Untagged
@@ -40,7 +41,7 @@ Transform:
   - {fileID: 753925736658667804}
   - {fileID: 8158414330059456262}
   m_Father: {fileID: 0}
-  m_RootOrder: -1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!54 &972983610658347909
 Rigidbody:
@@ -304,6 +305,25 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &7620058010574767347
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2236540162436045642}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db4f064d4ab260e40a3d62d74fc800fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  visibilityManager: {fileID: 0}
+  numRaysPerDegree: 30
+  numSteps: 1024
+  viewAngle: 90
+  viewDistance: 10
+  enableDebugRays: 1
+  enableDebugRaysInGame: 1
 --- !u!1001 &1007893773254782711
 PrefabInstance:
   m_ObjectHideFlags: 0

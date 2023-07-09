@@ -33,7 +33,9 @@ void Raymarch(inout float t, float2 rayOrigin, float2 direction, float dt)
         float depth = MapDepthTexture.Load(texPosPixels).r;
 
         // If we hit something, break out of the loop
-        if(MinDepth < depth) {
+        if (MinDepth < depth)
+        {
+            t += 5 * dt;
             break;
         }
 

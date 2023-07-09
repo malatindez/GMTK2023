@@ -9,6 +9,7 @@ using UnityEngine.PlayerLoop;
 [RequireComponent (typeof(FieldOfView))]
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(AudioSource))]
+[RequireComponent(typeof(VisibilityCone))]
 public class EnemyAI : MonoBehaviour
 {
     [SerializeField] private PatrolPoint[] _patrolPoints;
@@ -24,7 +25,7 @@ public class EnemyAI : MonoBehaviour
 
     private Queue<PatrolPoint> _points;
     private PatrolPoint _currentPoint;
-
+    private VisibilityCone _visibilityCone;
     private bool IsWalking
     {
         get => _animator.GetBool(nameof(IsWalking));
@@ -39,6 +40,7 @@ public class EnemyAI : MonoBehaviour
         _noticeSound = GetComponent<AudioSource>();
         _agent = GetComponent<NavMeshAgent>();
         _fieldOfView = GetComponent<FieldOfView>();
+        _visibilityCone = GetComponent<VisibilityCone>();
         _points = new Queue<PatrolPoint>(_patrolPoints);
         StartCoroutine(Patrol());
     }
@@ -51,6 +53,8 @@ public class EnemyAI : MonoBehaviour
         _currentPoint = null;
 
         _currentOwner = owner;
+        _visibilityCone.enabled = true;
+
         StartCoroutine(Control());
     }
 
@@ -59,7 +63,7 @@ public class EnemyAI : MonoBehaviour
         StopAllCoroutines();
         StartCoroutine(Patrol());
         IsUnderControl = false;
-
+        _visibilityCone.enabled = false;
         _currentOwner.EndTelepaty();
     }
 

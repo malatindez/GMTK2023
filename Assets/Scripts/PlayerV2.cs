@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Animator))]
+[RequireComponent (typeof(VisibilityCone))]
 public class PlayerV2 : MonoBehaviour
 {
     [SerializeField] private float _controlRange = 6;
@@ -15,6 +16,7 @@ public class PlayerV2 : MonoBehaviour
     private Rigidbody _rigidbody;
     private Animator _animator;
     private Camera _camera;
+    private VisibilityCone _visibilityCone;
 
     private bool IsWalking
     {
@@ -28,6 +30,7 @@ public class PlayerV2 : MonoBehaviour
     {
         _rigidbody = GetComponent<Rigidbody>();
         _animator = GetComponent<Animator>();
+        _visibilityCone = GetComponent<VisibilityCone>();
         _camera = Camera.main;
 
         StartCoroutine(CharacterLoop());
@@ -36,6 +39,7 @@ public class PlayerV2 : MonoBehaviour
     public void EndTelepaty() 
     {
         StartCoroutine(CharacterLoop());
+        _visibilityCone.enabled = true;
         CameraAttacher.Instance.SetTarget(transform);
     }
 
@@ -87,7 +91,9 @@ public class PlayerV2 : MonoBehaviour
                     if (hit.collider.TryGetComponent(out EnemyAI enemyAI))
                     {
                         StopAllCoroutines();
+                        _visibilityCone.enabled = false;
                         enemyAI.StartTelepaty(this);
+                        
                         CameraAttacher.Instance.SetTarget(enemyAI.transform);
                     }
                 }
