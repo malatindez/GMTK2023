@@ -1,9 +1,11 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class TerminalTrigger : MonoBehaviour
 {
     [SerializeField] private int _terminalAccess;
-    [SerializeField] private Door _door;
+    [SerializeField] private List<Door> _doors;
+    [SerializeField] private List<JailWall> _walls;
     [SerializeField] private GameObject _prefab;
     [SerializeField] private string _header;
     [SerializeField] private string _text;
@@ -15,7 +17,8 @@ public class TerminalTrigger : MonoBehaviour
             if (temp == null)
             {
                 temp = Instantiate(_prefab);
-                temp.GetComponentInChildren<ButtonOpenDoor>().addDoor(_door);
+                foreach (Door door in _doors) temp.GetComponentInChildren<ButtonOpenDoor>().addDoor(door);
+                foreach (JailWall wall in _walls) temp.GetComponentInChildren<ButtonOpenJailWall>().addJailWall(wall);
                 temp.GetComponent<Terminal>().SetHeader(_header);
                 temp.GetComponent<Terminal>().SetText(_text);
             }
