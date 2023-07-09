@@ -3,8 +3,21 @@ guid: 24f68f610c43fed4ca389e790923f495
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
-  executionOrder: 0
+  defaultReferences:
+  - _clearShaderR8: {fileID: 7200000, guid: 6d76685a358ae6c448cc35ecb1db195a, type: 3}
+  - _clearShaderR8G8B8A8: {fileID: 7200000, guid: 2215c34a17ae1e34fa93a5942c308c39,
+      type: 3}
+  - _fogOfWarMaskShader: {fileID: 7200000, guid: fb4619575b6a3a04e83f1134d309a4a1,
+      type: 3}
+  - _mapCamera: {instanceID: 0}
+  - _mapDepthTexture: {fileID: 8400000, guid: 4d42ddf787773a34980404892f5d82a0, type: 2}
+  - _visibilityConeShader: {fileID: 7200000, guid: d53800d7f873bd24a99b8051b856e78a,
+      type: 3}
+  - _visibiltyMaskShader: {fileID: 4800000, guid: 0e7003acf955d7447941a11a97941114,
+      type: 3}
+  - _R8ToR8G8B8A8TransferShader: {fileID: 7200000, guid: 7411a2935c82d324bafefc61bee3974d,
+      type: 3}
+  executionOrder: 5
   icon: {instanceID: 0}
   userData: 
   assetBundleName: 

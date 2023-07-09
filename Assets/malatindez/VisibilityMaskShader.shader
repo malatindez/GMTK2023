@@ -1,15 +1,17 @@
-Shader"Unlit/VisibilityMaskShader"
+Shader "Unlit/VisibilityMaskShader"
 {
     Properties
     {
         _FurthestVisibleDistances ("FurthestVisibleDistances", 2D) = "white" {}
-         _Color ("Color", Color) = (1,1,1,1) 
+        _Color ("Color", Color) = (1,1,1,1) 
     }
     SubShader
     {
         // No culling or depth
 Cull Off
+
 ZWrite Off
+
 ZTest Always
 
         Pass
@@ -34,8 +36,8 @@ struct v2f
 };
 
 sampler2D _FurthestVisibleDistances;
-float _ViewDistance;
 float4 _Color;
+float _ViewDistance;
             
 float2 RayOrigin;
 float2 RayDirection;
@@ -53,7 +55,7 @@ v2f vert(appdata v)
     return o;
 }
 
-uint frag(v2f i) : SV_Target
+fixed frag(v2f i) : SV_Target
 {
     float halfViewAngle = ViewAngle / 2.0f;
     int numRays = ceil(ViewAngle * NumRaysPerDegree);
@@ -62,7 +64,7 @@ uint frag(v2f i) : SV_Target
     float3 worldPos = i.worldPos.xyz;
 
     float2 toPixel = worldPos.xz - RayOrigin;
-                
+                        
     float2 normalizedToPixel = normalize(toPixel.xy);
     float2 normalizedRayDirection = normalize(RayDirection);
 
@@ -71,19 +73,18 @@ uint frag(v2f i) : SV_Target
 
     int rayId = int((angle + halfViewAngle) / angleStep);
     float distance = length(toPixel.xy);
-                
+                        
     float2 rayTextureCoord = float2(rayId % (uint) RayTextureSize, rayId / (uint) RayTextureSize) / (uint) RayTextureSize;
     float furthestVisibleDistance = tex2D(_FurthestVisibleDistances, rayTextureCoord).r;
-                
+                        
     if (distance > furthestVisibleDistance)
     {
-        return 128;
+        return 0.5f;
     }
 
-    uint col = lerp(0.3f, 0.5f, distance / _ViewDistance) * 255;
+    float col = lerp(0.0f, 0.5f, distance / _ViewDistance);
     return col;
 }
-
             ENDCG
         }
     }

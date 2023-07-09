@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,8 +9,27 @@ public class Player : Character
 	
 	public float MaxPerceptionShiftRange => _maxPerceptionShiftRange;
 
-	public void TryKill()
+    private void Start()
+    {
+		StartCoroutine(Spawn());
+    }
+
+    public void TryKill()
 	{
-		Debug.Log("PLAYER DEAD!!!");
+		// [TODO]: fix
+
+		//StopAllCoroutines();
+		//IsWalking = false;
+		//_animator.SetTrigger(Constants.PlayerDiedTrigger);
+	}
+
+	private IEnumerator Spawn()
+	{
+		yield return null;
+
+		if (CheckPointManager.TryGetSpawnPosition(out Vector3 position))
+		{
+			transform.position = position;
+		}
 	}
 }

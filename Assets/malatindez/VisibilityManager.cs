@@ -1,10 +1,14 @@
-using NaughtyAttributes;
 using System;
 using System.IO;
 using UnityEngine;
 
 public class VisibilityManager : MonoBehaviour
 {
+    // TODO:
+    // Update the visibility cone so it depends on the point's height and
+    // computes an angle between the point and the camera to check if there's an intersection.
+    // TODO:
+    // multiple depth maps with different resolution to approximate
     #region Methods
 
     public void GetCameraBounds()
@@ -22,20 +26,32 @@ public class VisibilityManager : MonoBehaviour
     }
 
     public void UpdateVisibilityMask(
-        Vector3 rayDirection,
-        Vector3 rayOrigin,
+        Vector3 worldRayDirection,
+        Vector3 worldRayOrigin,
         float viewAngle,
-        float viewDistance,
+        float worldViewDistance,
         int numRaysPerDegree,
         int numSteps,
         bool updateFogOfWar = true
         )
     {
+        if (numSteps <= 1 || numRaysPerDegree <= 0 || viewAngle < 0)
+        {
+            Debug.LogWarning("Invalid parameters for visibility mask calculation");
+            return;
+        }
+        Vector3 unprojectedRayOrigin = _mapCamera.WorldToViewportPoint(worldRayOrigin);
+        Vector3 unprojectedRayDirection = _mapCamera.WorldToViewportPoint(worldRayOrigin + worldRayDirection) - unprojectedRayOrigin;
+        Vector2 rayOrigin = new(unprojectedRayOrigin.x, unprojectedRayOrigin.y);
+        Vector2 rayDirection = new(unprojectedRayDirection.x, unprojectedRayDirection.y);
+        rayDirection.Normalize();
+        float viewDistance = worldViewDistance / _mapCamera.orthographicSize * 2.0f;
         ClearFurthestVisibleDistances();
         int numRays = Mathf.CeilToInt(viewAngle * numRaysPerDegree);
         _visibilityConeShader.SetTexture(0, "FurthestVisibleDistances", _furthestVisibleDistances);
         _visibilityConeShader.SetTexture(0, "MapDepthTexture", _mapDepthTexture);
 
+        _visibilityConeShader.SetVector("MapDepthTextureSize", new Vector2(_mapDepthTexture.width, _mapDepthTexture.height));
         _visibilityConeShader.SetVector("RayOrigin", rayOrigin);
         _visibilityConeShader.SetVector("RayDirection", rayDirection);
         _visibilityConeShader.SetFloat("ViewAngle", viewAngle);
@@ -47,29 +63,40 @@ public class VisibilityManager : MonoBehaviour
         int threadGroups = Mathf.CeilToInt(numRays / 64.0f);
         _visibilityConeShader.Dispatch(0, threadGroups, 1, 1);
 
-        _visibilityMaskMaterial.SetFloat("_ViewDistance", viewDistance);
-        _visibilityMaskMaterial.SetVector("RayOrigin", rayOrigin);
-        _visibilityMaskMaterial.SetVector("RayDirection", rayDirection);
-        _visibilityMaskMaterial.SetFloat("ViewAngle", viewAngle);
-        _visibilityMaskMaterial.SetFloat("ViewDistance", viewDistance);
-        _visibilityMaskMaterial.SetInt("NumRaysPerDegree", numRaysPerDegree);
-        _visibilityMaskMaterial.SetInt("RayTextureSize", _rayTextureSize);
-        // call VisibilityMaskShader to draw to _visibilityMask
-        Graphics.Blit(null, _visibilityMask, _visibilityMaskMaterial);
+        _visibilityMaskShader.SetTexture(0, "FurthestVisibleDistances", _furthestVisibleDistances);
+        _visibilityMaskShader.SetTexture(0, "DepthMap", _mapDepthTexture);
+        _visibilityMaskShader.SetTexture(0, "Result", VisibilityMask);
+        _visibilityMaskShader.SetVector("RayOrigin", rayOrigin);
+        _visibilityMaskShader.SetVector("RayDirection", rayDirection);
+        _visibilityMaskShader.SetFloat("ViewAngle", viewAngle);
+        _visibilityMaskShader.SetFloat("ViewDistance", viewDistance);
+        _visibilityMaskShader.SetInt("NumRaysPerDegree", numRaysPerDegree);
+        _visibilityMaskShader.SetInt("RayTextureSize", _rayTextureSize);
+        _visibilityMaskShader.SetInt("VisibilityMaskWidth", VisibilityMask.width);
+        _visibilityMaskShader.SetInt("VisibilityMaskHeight", VisibilityMask.height);
+        _visibilityMaskShader.SetFloat("MinAlpha", _minAlpha);
+        _visibilityMaskShader.Dispatch(0, VisibilityMask.width / 8, VisibilityMask.height / 8, 1);
+        // TODO: MOVE TO COMPUTE SHADER
         if (updateFogOfWar)
         {
-            //            _fogOfWarMaskShader.SetTexture(0, "VisibilityMask", _visibilityMask);
-            //            _fogOfWarMaskShader.SetTexture(0, "FogOfWarMask", _fogOfWarMask);
-            //            _fogOfWarMaskShader.Dispatch(0, _maskWidth / 8, _maskHeight / 8, 1);
+            _fogOfWarMaskShader.SetTexture(0, "VisibilityMask", VisibilityMask);
+            _fogOfWarMaskShader.SetTexture(0, "FogOfWarMask", FogOfWarMask);
+            _fogOfWarMaskShader.Dispatch(0, _maskWidth / 8, _maskHeight / 8, 1);
         }
         if (_debugRenderMasks)
         {
-            _debugFogOfWarMaskView = RenderTextureToTexture2DR8(_fogOfWarMask);
-            _debugVisibilityMaskView = RenderTextureToTexture2DR8(_visibilityMask);
+            _debugFogOfWarMaskView = RenderTextureToTexture2DR8(FogOfWarMask);
+            _debugVisibilityMaskView = RenderTextureToTexture2DR8(VisibilityMask);
             _debugFurthestVisibleDistancesView = RenderTextureToTexture2DR32F(_furthestVisibleDistances);
             _debugRenderMasks = false;
+            File.WriteAllBytes("FogOfWarMask.png", _debugFogOfWarMaskView.EncodeToPNG());
+            File.WriteAllBytes("VisibilityMask.png", _debugVisibilityMaskView.EncodeToPNG());
+            File.WriteAllBytes("FurthestVisibleDistances.png", _debugFurthestVisibleDistancesView.EncodeToPNG());
+
         }
     }
+    public RenderTexture VisibilityMask { get; private set; }
+    public RenderTexture FogOfWarMask { get; private set; }
 
     #endregion Methods
 
@@ -77,7 +104,6 @@ public class VisibilityManager : MonoBehaviour
 
     [SerializeField] private ComputeShader _clearShaderR8;
     [SerializeField] private ComputeShader _clearShaderR8G8B8A8;
-    private RenderTexture _fogOfWarMask;
     [SerializeField] private ComputeShader _fogOfWarMaskShader;
     private RenderTexture _furthestVisibleDistances;
     [SerializeField] private Camera _mapCamera = null;
@@ -88,27 +114,36 @@ public class VisibilityManager : MonoBehaviour
     [SerializeField] private float _minDepth = 0.5f;
     private int _rayTextureSize;
     [SerializeField] private ComputeShader _visibilityConeShader;
-    private RenderTexture _visibilityMask;
-    private Material _visibilityMaskMaterial;
-    [SerializeField] private Shader _visibiltyMaskShader;
+    [SerializeField] private ComputeShader _visibilityMaskShader;
+    [SerializeField] private ComputeShader _R8ToR8G8B8A8TransferShader;
+    [SerializeField] private float _minAlpha = 0.5f;
 
     #endregion Fields
 
     #region Debug
     public Texture2D RenderTextureToTexture2DR8(RenderTexture renderTexture)
     {
-        return new(renderTexture.width, renderTexture.height);
-        Texture2D texture = new(renderTexture.width, renderTexture.height, TextureFormat.R8, false);
-        RenderTexture.active = renderTexture;
-        texture.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
-        texture.Apply();
-        RenderTexture.active = null;
-        return texture;
-        Texture2D rgbTex = new(texture.width, texture.height, TextureFormat.RGB24, false);
-        rgbTex.SetPixels(texture.GetPixels());
-        rgbTex.Apply();
-        return rgbTex;
+        Texture2D tempTexture = new(renderTexture.width, renderTexture.height, TextureFormat.RGBA32, false);
+
+        ComputeBuffer buffer = new(renderTexture.width * renderTexture.height * 4, sizeof(float));
+
+        _R8ToR8G8B8A8TransferShader.SetTexture(0, "Input", renderTexture);
+        _R8ToR8G8B8A8TransferShader.SetBuffer(0, "Result", buffer);
+        _R8ToR8G8B8A8TransferShader.SetInt("Width", renderTexture.width);
+        _R8ToR8G8B8A8TransferShader.Dispatch(0, renderTexture.width / 8, renderTexture.height / 8, 1);
+
+        Color[] colors = new Color[renderTexture.width * renderTexture.height];
+        buffer.GetData(colors);
+        tempTexture.SetPixels(colors);
+        tempTexture.Apply();
+
+        buffer.Release();
+
+
+        return tempTexture;
     }
+
+
     public Texture2D RenderTextureToTexture2DR32F(RenderTexture renderTexture)
     {
         Texture2D texture = new(renderTexture.width, renderTexture.height, TextureFormat.RFloat, false);
@@ -122,7 +157,7 @@ public class VisibilityManager : MonoBehaviour
             for (int x = 0; x < texture.width; x++)
             {
                 float rFloatValue = texture.GetPixel(x, y).r;
-                rgbTex.SetPixel(x, y, new Color(rFloatValue / 20, rFloatValue / 20, rFloatValue / 20));
+                rgbTex.SetPixel(x, y, new Color(rFloatValue / 10, rFloatValue / 10, rFloatValue / 10));
             }
         }
         rgbTex.Apply();
@@ -130,13 +165,6 @@ public class VisibilityManager : MonoBehaviour
     }
 
 
-    [Button("Write Texture2D to files")]
-    public void WriteTexturesToFiles()
-    {
-        File.WriteAllBytes("FogOfWarMask.png", _debugFogOfWarMaskView.EncodeToPNG());
-        File.WriteAllBytes("VisibilityMask.png", _debugVisibilityMaskView.EncodeToPNG());
-        File.WriteAllBytes("FurthestVisibleDistances.png", _debugFurthestVisibleDistancesView.EncodeToPNG());
-    }
 
     private Texture2D _debugFogOfWarMaskView;
     private Texture2D _debugFurthestVisibleDistancesView;
@@ -158,7 +186,7 @@ public class VisibilityManager : MonoBehaviour
 
     private void ClearFogOfWarMask()
     {
-        _clearShaderR8.SetTexture(0, "Result", _fogOfWarMask);
+        _clearShaderR8.SetTexture(0, "Result", FogOfWarMask);
         _clearShaderR8.SetInt("Width", _maskWidth);
         _clearShaderR8.SetInt("Height", _maskHeight);
         _clearShaderR8.SetInt("ClearColor", 0);
@@ -170,7 +198,7 @@ public class VisibilityManager : MonoBehaviour
 
     private void ClearVisibilityMask()
     {
-        _clearShaderR8.SetTexture(0, "Result", _visibilityMask);
+        _clearShaderR8.SetTexture(0, "Result", VisibilityMask);
         _clearShaderR8.SetInt("Width", _maskWidth);
         _clearShaderR8.SetInt("Height", _maskHeight);
         _clearShaderR8.SetInt("ClearColor", 0);
@@ -189,17 +217,17 @@ public class VisibilityManager : MonoBehaviour
     {
         _maskHeight = _mapDepthTexture.height;
         _maskWidth = _mapDepthTexture.width;
-        _visibilityMask = new RenderTexture(_maskWidth, _maskHeight, 0)
+        VisibilityMask = new RenderTexture(_maskWidth, _maskHeight, 0)
         {
             enableRandomWrite = true,
             depthStencilFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.None,
-            graphicsFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.R8_UInt
+            graphicsFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.R8_UNorm
         };
-        _fogOfWarMask = new RenderTexture(_maskWidth, _maskHeight, 0)
+        FogOfWarMask = new RenderTexture(_maskWidth, _maskHeight, 0)
         {
             enableRandomWrite = true,
             depthStencilFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.None,
-            graphicsFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.R8_UInt
+            graphicsFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.R8_UNorm
         };
 
         _rayTextureSize = (int)Math.Sqrt(Math.Pow(2, Math.Ceiling(Math.Log(_maximumTotalAmountOfRays) / Math.Log(2))));
@@ -209,8 +237,6 @@ public class VisibilityManager : MonoBehaviour
             depthStencilFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.None,
             graphicsFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.R32_SFloat
         };
-        _visibilityMaskMaterial = new Material(_visibiltyMaskShader);
-        _visibilityMaskMaterial.SetTexture("_FurthestVisibleDistances", _furthestVisibleDistances);
 
         ClearFogOfWarMask();
         ClearVisibilityMask();

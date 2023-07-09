@@ -1,0 +1,79 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+
+RWTexture2D<float> FurthestVisibleDistances;
+Texture2D<float> DepthMap;
+RWTexture2D<float> Result;
+float2 RayOrigin;
+float2 RayDirection;
+float ViewAngle;
+float ViewDistance;
+int NumRaysPerDegree;
+int RayTextureSize;
+int VisibilityMaskWidth;
+int VisibilityMaskHeight;
+float MinAlpha;
+
+float2x2 rotate(float angle)
+{
+    return float2x2(
+        cos(angle), -sin(angle),
+        sin(angle), cos(angle));
+}
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    float halfViewAngle = radians(ViewAngle / 2.0f);
+    uint numRays = ceil(ViewAngle * NumRaysPerDegree);
+    float angleStep = radians(ViewAngle) / (float) (numRays - 1);
+
+    float2 worldPos = id.xy / float2(VisibilityMaskWidth, VisibilityMaskHeight);
+    float2 toPixel = worldPos.xy - RayOrigin;
+    float distance = length(toPixel.xy);
+    float2 normalizedToPixel = normalize(toPixel.xy);
+    
+    if (acos(dot(normalizedToPixel, RayDirection)) > halfViewAngle)
+    {
+        Result[id.xy] = 0;
+#ifdef DEBUG_SHADER
+        Result[id.xy] = DepthMap[id.xy];
+#endif
+        return;
+    }
+    float2 normalizedRayDirection = mul(rotate(-halfViewAngle), RayDirection);
+    normalizedRayDirection = normalize(normalizedRayDirection);
+
+    float dotProduct = dot(normalizedToPixel, normalizedRayDirection);
+    float angle = acos(dotProduct);
+    
+    uint rayId = uint(angle / angleStep);
+    if (rayId > numRays - 1)
+    {
+        Result[id.xy] = 0;
+#ifdef DEBUG_SHADER
+        Result[id.xy] = DepthMap[id.xy];
+#endif
+        return;
+    }
+    uint2 rayTextureCoord = uint2(rayId % (uint) RayTextureSize, rayId / (uint) RayTextureSize);
+    float furthestVisibleDistance = FurthestVisibleDistances[rayTextureCoord].r;
+    
+    if (distance > furthestVisibleDistance)
+    {
+        Result[id.xy] = 0;
+#ifdef DEBUG_SHADER
+        Result[id.xy] = DepthMap[id.xy];
+#endif
+        return;
+    }
+    Result[id.xy] = lerp(MinAlpha, 1.0f,
+        (
+            dot(normalizedToPixel, RayDirection) - cos(halfViewAngle)
+        ) / ( // -------------------------------
+                    1.0f - cos(halfViewAngle)
+        )
+    );
+}

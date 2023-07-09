@@ -42,9 +42,13 @@ Shader "Unlit/DepthViewShader"
             fixed4 frag (v2f i) : SV_Target
             {
                 float depth = tex2D(_MainTex, i.uv).r;
-
                 fixed4 col;
                 col.rgb = depth;
+                if(depth == 0)
+    {
+        col.r = fixed4(1, 0, 0, 1);
+
+    }
                 col.a = 1.0f;
 
                 return col;

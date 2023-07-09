@@ -1,60 +1,64 @@
+using System.Collections;
 using UnityEngine;
-
+[ExecuteInEditMode]
 public class VisibilityCone : MonoBehaviour
 {
     #region Fields
-
-    public Transform MapFloor = null;
-    public int maskResolution = 512;
-    public int numRaysPerDegree = 1;
+    [SerializeField] private VisibilityManager visibilityManager;
+    public int numRaysPerDegree = 30;
+    public int numSteps = 1024;
     public float viewAngle = 90.0f;
     public float viewDistance = 10.0f;
-    public Texture2D visibilityMask;
-
+    public bool enableDebugRays = true;
+    public bool enableDebugRaysInGame = true;
     #endregion Fields
 
     #region Methods
 
-    private Vector2 CalculateMaskUV(Vector3 worldPosition)
-    {
-        Vector3 localPosition = MapFloor.InverseTransformPoint(worldPosition);
-        Vector2 maskUV = new(localPosition.x / MapFloor.localScale.x, localPosition.z / MapFloor.localScale.z);
-        maskUV += Vector2.one * 0.5f;
-        return maskUV;
-    }
-
     private void Start()
     {
-        visibilityMask = new Texture2D(maskResolution, maskResolution, TextureFormat.R8, false);
+        _ = StartCoroutine(SkipFirst());
     }
 
-    private void Update()
+    private void drawDebugRays()
     {
-        // i know this is a dumbass way, but gotta go fast
-        // prolly would be better to move this stuff to compute shader, but whatever
-
-        Vector3 playerPosition = transform.position;
-        Vector3 viewDirection = transform.forward;
-
-        float halfViewAngle = viewAngle / 2.0f;
-        int numRays = Mathf.CeilToInt(viewAngle * numRaysPerDegree);
-
-        Color[] blackPixels = new Color[maskResolution * maskResolution];
-        visibilityMask.SetPixels(blackPixels);
-        for (int i = 0; i < numRays; ++i)
+        for (int i = 0; i < numRaysPerDegree * viewAngle; i++)
         {
-            float angle = -halfViewAngle + (i / (float)(numRays - 1) * viewAngle);
-            Vector3 direction = Quaternion.Euler(0.0f, angle, 0.0f) * viewDirection;
-
-            Ray ray = new(playerPosition, direction);
-
-            if (Physics.Raycast(ray, out RaycastHit hit, viewDistance))
-            {
-                Vector2 maskUV = CalculateMaskUV(hit.point);
-                visibilityMask.SetPixel(Mathf.RoundToInt(maskUV.x * maskResolution), Mathf.RoundToInt(maskUV.y * maskResolution), Color.white);
-            }
+            float angle = ((float)i / numRaysPerDegree) - (viewAngle / 2.0f);
+            Vector3 dir = Quaternion.AngleAxis(angle, Vector3.up) * transform.forward;
+            Debug.DrawRay(transform.position, dir * viewDistance, Color.red);
         }
-        visibilityMask.Apply();
+    }
+
+    private IEnumerator SkipFirst()
+    {
+        yield return null; // skip first update
+
+        while (true)
+        {
+            if (Application.isPlaying)
+            {
+                visibilityManager.UpdateVisibilityMask(
+                    transform.forward,
+                    transform.position,
+                    viewAngle,
+                    viewDistance,
+                    numRaysPerDegree,
+                    numSteps,
+                    true);
+
+                if (enableDebugRaysInGame)
+                {
+                    drawDebugRays();
+                }
+            }
+            else if (enableDebugRays)
+            {
+                drawDebugRays();
+            }
+
+            yield return null;
+        }
     }
 
     #endregion Methods
