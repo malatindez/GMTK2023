@@ -31,6 +31,10 @@ public class FocusVisual : MonoBehaviour
 
             transform.position = pos;
 
+            var min = Mathf.Min(transform.position.y, btn.transform.position.y);
+            var max = Mathf.Max(transform.position.y, btn.transform.position.y);
+            if (max - min < 0.1f) yield break;
+
             yield return null;
         }
     }
