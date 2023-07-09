@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Rigidbody))]
 public class Player : Character
@@ -16,11 +17,7 @@ public class Player : Character
 
     public void TryKill()
 	{
-		// [TODO]: fix
-
-		//StopAllCoroutines();
-		//IsWalking = false;
-		//_animator.SetTrigger(Constants.PlayerDiedTrigger);
+		SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 	}
 
 	private IEnumerator Spawn()

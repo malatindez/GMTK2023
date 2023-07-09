@@ -8,6 +8,7 @@ using UnityEngine.PlayerLoop;
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent (typeof(FieldOfView))]
 [RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(AudioSource))]
 public class EnemyAI : MonoBehaviour
 {
     [SerializeField] private PatrolPoint[] _patrolPoints;
@@ -15,6 +16,7 @@ public class EnemyAI : MonoBehaviour
 
     private Animator _animator;
     private NavMeshAgent _agent;
+    private AudioSource _noticeSound;
     private FieldOfView _fieldOfView;
     private bool _isPlayerNoticed;
     private GameObject _target;
@@ -33,6 +35,7 @@ public class EnemyAI : MonoBehaviour
     private void Start()
     {
         _animator = GetComponent<Animator>();
+        _noticeSound = GetComponent<AudioSource>();
         _agent = GetComponent<NavMeshAgent>();
         _fieldOfView = GetComponent<FieldOfView>();
         _points = new Queue<PatrolPoint>(_patrolPoints);
@@ -67,6 +70,8 @@ public class EnemyAI : MonoBehaviour
                 yield return new WaitForSeconds(1f);
                 _agent.SetDestination(_target.transform.position);
                 StartCoroutine(Hunt());
+                _agent.speed = 7;
+                
 
                 yield break;
             }
@@ -130,5 +135,6 @@ public class EnemyAI : MonoBehaviour
     {
         _animator.SetTrigger(Constants.PlayerNoticedTrigger);
         _noticeFx.SetActive(true);
+        _noticeSound.Play();
     }
 }
