@@ -10,6 +10,6 @@ public class Player : Character
 
 	public void TryKill()
 	{
-		Debug.Log("PLAYER DEAD!!!");
+		_animator.SetTrigger(Constants.PlayerDiedTrigger);
 	}
 }

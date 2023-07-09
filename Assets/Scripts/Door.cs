@@ -13,7 +13,7 @@ public class Door : MonoBehaviour
     {
         if (!_state)
         {
-            _animator.Play("door-open");
+            _animator.Play(Constants.DoorOpenStageName);
             _state = true;
             StartCoroutine(AutoCloseDoor(_autoCloseDoorTime));
         }
@@ -24,6 +24,6 @@ public class Door : MonoBehaviour
         yield return new WaitForSeconds(seconds);
         if (seconds != 0) DoorClose();
     }
-    public void DoorClose() => _animator.Play("door-close");
+    public void DoorClose() => _animator.Play(Constants.DoorCloseStageName);
     private void ReversState() => _state = !_state;
 }
