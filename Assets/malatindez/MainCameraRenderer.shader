@@ -21,6 +21,7 @@ Shader "Unlit/MainCameraRenderer" // DO NOT CHANGE. Main camera renderer feature
             #pragma fragment frag
             // make fog effect available in scene view
             #pragma multi_compile_fog
+            #pragma glsl_precision_high
 
             #include "UnityCG.cginc"
 
@@ -34,6 +35,10 @@ Shader "Unlit/MainCameraRenderer" // DO NOT CHANGE. Main camera renderer feature
             float4x4 _OrthoProj;
             float4x4 _InvMainView;
             float4x4 _InvMainProj;
+            float4x4 _MainView;
+            float4x4 _MainProj;
+            float _PerspectiveAspectRatio;
+            float _OrthoAspectRatio;
             
             struct appdata
             {
@@ -56,27 +61,35 @@ Shader "Unlit/MainCameraRenderer" // DO NOT CHANGE. Main camera renderer feature
                 return o;
             }
 
+float2 adjustAspectRatio(float2 uv, float fromAspect, float toAspect)
+{
+    float ratio = fromAspect / toAspect;
+    uv.x = uv.x * ratio + (1.0 - ratio) * 0.5;
+    uv.y = uv.y * ratio + (1.0 - ratio) * 0.5;
+    return uv;
+}
+
             fixed4 frag(v2f i) : SV_Target
             {
-                float rawDepth = UNITY_SAMPLE_TEX2D(_EnvironmentDepthTex, i.uv);
-    
-                float4 viewPos = mul(_InvMainProj, float4(i.uv * 2.0 - 1.0, rawDepth, 1.0));
-                viewPos /= viewPos.w;
-                float3 worldPos = mul(_InvMainView, viewPos).xyz;
+                // Reconstructing the eye space position from depth buffer value
+                float depth = UNITY_SAMPLE_TEX2D(_EnvironmentDepthTex, i.uv).r;
+                float4 clipPos = float4(i.uv * 2.0 - 1.0, depth * 2 - 1, 1.0);
+    float4 viewPos = mul(_InvMainProj, clipPos);
+                viewPos /= viewPos.w; // undo the perspective division
+    float3 worldPos = mul(_InvMainView, viewPos).xyz;
+    //return fixed4(worldPos.xyz / 10, 1);
 
-    
-                // Convert world space coordinates to orthographic camera space
-                float3 viewPosOrtho = mul(_OrthoView, float4(worldPos, 1.0)).xyz;
-                float3 projPosOrtho = mul(_OrthoProj, float4(viewPosOrtho, 1.0)).xyz;
-                float2 orthoUV = 0.5 * (projPosOrtho.xy / projPosOrtho.z) + 0.5;
+                // Compute ortho UV of the pixel from world position and ortho matrices
+                float4 orthoPos = mul(_OrthoProj, mul(_OrthoView, float4(worldPos, 1)));
+                float2 orthoUV = (orthoPos.xy / orthoPos.w) * 0.5 + 0.5;
     
                 float fog = UNITY_SAMPLE_TEX2D(_VisibilityFogOfWarTex, orthoUV).r;
                 float vis = UNITY_SAMPLE_TEX2D(_VisibilityTex, orthoUV).r;
     
                 float4 col = UNITY_SAMPLE_TEX2D(_EnvironmentTex, i.uv);
                 float4 col2 = UNITY_SAMPLE_TEX2D(_WorldTex, i.uv);
-    return fixed4(orthoUV.x  / 1000, orthoUV.y /1000, 0, 1);
-    return col;
+//                return float4(fog,vis,0,1);
+    return float4(worldPos / 10, 1);
                 fixed4 finalColor = fixed4(i.uv.x, i.uv.y, 0, 1);
                 return finalColor;
             }

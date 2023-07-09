@@ -74,9 +74,15 @@ public class RenderManager : MonoBehaviour
         MainCameraRenderer.visibilityTexture = _visibilityManager.VisibilityMask;
         MainCameraRenderer.orthoProj = _mapRenderer.projectionMatrix;
         MainCameraRenderer.orthoView = _mapRenderer.worldToCameraMatrix;
-        MainCameraRenderer.invMainProj = _environmentDepthRenderer.projectionMatrix.inverse;
-        MainCameraRenderer.invMainView = _environmentDepthRenderer.worldToCameraMatrix.inverse;
 
+        MainCameraRenderer.invMainProj = _environmentDepthRenderer.projectionMatrix.inverse;
+        MainCameraRenderer.invMainView = _environmentDepthRenderer.cameraToWorldMatrix;
+
+        MainCameraRenderer.MainProj = _environmentDepthRenderer.projectionMatrix;
+        MainCameraRenderer.MainView = _environmentDepthRenderer.worldToCameraMatrix;
+
+        MainCameraRenderer.PerspectiveAspectRatio = _environmentDepthRenderer.aspect;
+        MainCameraRenderer.OrthoAspectRatio = _mapRenderer.aspect;
 
         UpdateTextureIfResolutionChanged(ref _mainRenderTexture, _mainRenderer);
         UpdateTextureIfResolutionChanged(ref _environmentRenderTexture, _environmentRenderer);
