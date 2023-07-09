@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Camera))]
@@ -26,6 +27,14 @@ public class RenderManager : MonoBehaviour
         {
             enableRandomWrite = true
         };
+        _ = StartCoroutine(SkipFirst());
+    }
+
+    private IEnumerator SkipFirst()
+    {
+        yield return null; // skip first update
+
+        _mapRenderer.enabled = false;
     }
     private static bool UpdateTextureIfResolutionChanged(RenderTexture texture)
     {
