@@ -6,17 +6,16 @@ using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Animator))]
-[RequireComponent (typeof(VisibilityCone))]
 public class PlayerV2 : MonoBehaviour
 {
     [SerializeField] private float _controlRange = 6;
     [SerializeField] private float _moveSpeed = 6;
     [SerializeField] private LayerMask _clickTargets;
+    [SerializeField] private VisibilityCone _visibilityCone;
 
     private Rigidbody _rigidbody;
     private Animator _animator;
     private Camera _camera;
-    private VisibilityCone _visibilityCone;
 
     private bool IsWalking
     {
@@ -30,7 +29,6 @@ public class PlayerV2 : MonoBehaviour
     {
         _rigidbody = GetComponent<Rigidbody>();
         _animator = GetComponent<Animator>();
-        _visibilityCone = GetComponent<VisibilityCone>();
         _camera = Camera.main;
 
         StartCoroutine(CharacterLoop());

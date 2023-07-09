@@ -24,7 +24,9 @@ public class RenderManager : MonoBehaviour
         _displayCamera = GetComponent<Camera>();
         _ = StartCoroutine(SkipFirst());
     }
-
+    // TODO: move the map renderer to separate class, draw to RAW texture from editor.
+    // TODO: change the environment render so it renders to separate RenderTexture
+    // This way we can ensure that even if something moves, we don't see it.
     private IEnumerator SkipFirst()
     {
         yield return null; // skip first update

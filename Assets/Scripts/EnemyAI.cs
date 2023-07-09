@@ -9,11 +9,11 @@ using UnityEngine.PlayerLoop;
 [RequireComponent (typeof(FieldOfView))]
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(AudioSource))]
-[RequireComponent(typeof(VisibilityCone))]
 public class EnemyAI : MonoBehaviour
 {
     [SerializeField] private PatrolPoint[] _patrolPoints;
     [SerializeField] private GameObject _noticeFx; 
+    [SerializeField] private VisibilityCone _visibilityCone;
 
     private Animator _animator;
     private NavMeshAgent _agent;
@@ -25,7 +25,7 @@ public class EnemyAI : MonoBehaviour
 
     private Queue<PatrolPoint> _points;
     private PatrolPoint _currentPoint;
-    private VisibilityCone _visibilityCone;
+
     private bool IsWalking
     {
         get => _animator.GetBool(nameof(IsWalking));
@@ -40,7 +40,6 @@ public class EnemyAI : MonoBehaviour
         _noticeSound = GetComponent<AudioSource>();
         _agent = GetComponent<NavMeshAgent>();
         _fieldOfView = GetComponent<FieldOfView>();
-        _visibilityCone = GetComponent<VisibilityCone>();
         _points = new Queue<PatrolPoint>(_patrolPoints);
         StartCoroutine(Patrol());
     }

@@ -60,38 +60,39 @@ Shader "Unlit/MainCameraRenderer" // DO NOT CHANGE. Main camera renderer feature
 
 
             fixed4 frag(v2f i) : SV_Target
-{
-    
-    float4 col = UNITY_SAMPLE_TEX2D(_EnvironmentTex, i.uv);
-    float4 col2 = UNITY_SAMPLE_TEX2D(_WorldTex, i.uv);
-            float depth = UNITY_SAMPLE_TEX2D(_EnvironmentDepthTex, i.uv);
-            if (depth <= 0.001) // if we don't see anything
             {
-        return col;
-    }
+        
+                float4 col = UNITY_SAMPLE_TEX2D(_EnvironmentTex, i.uv);
+                float4 col2 = UNITY_SAMPLE_TEX2D(_WorldTex, i.uv);
+                float depth = UNITY_SAMPLE_TEX2D(_EnvironmentDepthTex, i.uv);
+                if (depth <= 0.001) // if we don't see anything
+                {
+                    return col;
+                }
 
-            // Compute normalized viewport position in the range [-1, 1]
-            float2 uv = i.uv * 2 - 1;
+                // Compute normalized viewport position in the range [-1, 1]
+                float2 uv = i.uv * 2 - 1;
 
-            // Unproject the depth and viewport position to homogenized coordinates
-            float4 homogenizedPos = float4(uv.x, uv.y, depth, 1.0);
-    
-            // Transform to world coordinates
-            float4 worldPos = mul(_InvViewProj, homogenizedPos);
+                // Unproject the depth and viewport position to homogenized coordinates
+                float4 homogenizedPos = float4(uv.x, uv.y, depth, 1.0);
+        
+                // Transform to world coordinates
+                float4 worldPos = mul(_InvViewProj, homogenizedPos);
 
-            // Divide by w to dehomogenize
-            worldPos /= worldPos.w;
-    
-            float4 orthoPos = mul(_OrthoViewProj, worldPos);
-            float2 orthoUV = orthoPos.xy / orthoPos.w;
-            orthoUV = (orthoUV + 1) * 0.5;
+                // Divide by w to dehomogenize
+                worldPos /= worldPos.w;
+        
+                float4 orthoPos = mul(_OrthoViewProj, worldPos);
+                float2 orthoUV = orthoPos.xy / orthoPos.w;
+                orthoUV = (orthoUV + 1) * 0.5;
 
-            float fog = UNITY_SAMPLE_TEX2D(_VisibilityFogOfWarTex, orthoUV);
-            float vis = UNITY_SAMPLE_TEX2D(_VisibilityTex, orthoUV);
+                float fog = UNITY_SAMPLE_TEX2D(_VisibilityFogOfWarTex, orthoUV);
+                float vis = UNITY_SAMPLE_TEX2D(_VisibilityTex, orthoUV);
 
-            return col2 * vis * 0.5 + float4(float3(length(col.xyz) / 3, length(col.xyz) / 3, length(col.xyz) / 3) * fog, 1) * 0.1;
+                return col2 * vis * 0.5 + 
+                    float4(float3(length(col.xyz) / 3, length(col.xyz) / 3, length(col.xyz) / 3) * fog, 1) * 0.1;
 
-}
+            }
             ENDCG
         }
     }

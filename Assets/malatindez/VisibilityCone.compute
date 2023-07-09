@@ -3,8 +3,8 @@
 RWTexture2D<float> FurthestVisibleDistances;
 Texture2D<float> MapDepthTexture;
 float2 MapDepthTextureSize;
-float2 RayOrigin;
-float2 RayDirection;
+float3 RayOrigin;
+float3 RayDirection;
 float ViewAngle;
 float ViewDistance;
 int NumRaysPerDegree;
@@ -53,8 +53,8 @@ void VisibilityCone (uint3 id : SV_DispatchThreadID)
 
     // find the angle depending on ray index.
     float angle = -halfViewAngle + id.x * angleStep;
-    float2 direction = mul(rotate(angle), RayDirection);
-    float2 rayOrigin = RayOrigin;
+    float2 direction = mul(rotate(angle), RayDirection.xy);
+    float2 rayOrigin = RayOrigin.xy;
     
     direction = normalize(direction);
 

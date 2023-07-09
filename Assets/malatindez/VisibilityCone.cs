@@ -40,7 +40,7 @@ public class VisibilityCone : MonoBehaviour
             {
                 visibilityManager.UpdateVisibilityMask(
                     transform.forward,
-                    transform.position - transform.forward * 0.5f,
+                    transform.position,
                     viewAngle,
                     viewDistance,
                     numRaysPerDegree,

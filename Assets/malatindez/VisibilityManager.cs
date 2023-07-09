@@ -24,6 +24,13 @@ public class VisibilityManager : MonoBehaviour
         Debug.Log("Bottom Left: " + bottomLeft);
         Debug.Log("Top Right: " + topRight);
     }
+    void Awake()
+    {
+#if UNITY_EDITOR
+        QualitySettings.vSyncCount = 0;  // VSync must be disabled
+        Application.targetFrameRate = 90;
+#endif
+    }
 
     public void UpdateVisibilityMask(
         Vector3 worldRayDirection,
@@ -40,12 +47,11 @@ public class VisibilityManager : MonoBehaviour
             Debug.LogWarning("Invalid parameters for visibility mask calculation");
             return;
         }
-        Vector3 unprojectedRayOrigin = _mapCamera.WorldToViewportPoint(worldRayOrigin);
-        Vector3 unprojectedRayDirection = _mapCamera.WorldToViewportPoint(worldRayOrigin + worldRayDirection) - unprojectedRayOrigin;
-        Vector2 rayOrigin = new(unprojectedRayOrigin.x, unprojectedRayOrigin.y);
-        Vector2 rayDirection = new(unprojectedRayDirection.x, unprojectedRayDirection.y);
+        Vector3 rayOrigin = _mapCamera.WorldToViewportPoint(worldRayOrigin);
+        Vector3 unprojectedRayDirection = _mapCamera.WorldToViewportPoint(worldRayOrigin + worldRayDirection) - rayOrigin;
+        Vector2 rayDirection = new Vector2(unprojectedRayDirection.x, unprojectedRayDirection.y);
+        float viewDistance = worldViewDistance * rayDirection.magnitude;
         rayDirection.Normalize();
-        float viewDistance = worldViewDistance / _mapCamera.orthographicSize * 2.0f;
         ClearFurthestVisibleDistances();
         int numRays = Mathf.CeilToInt(viewAngle * numRaysPerDegree);
         _visibilityConeShader.SetTexture(0, "FurthestVisibleDistances", _furthestVisibleDistances);
@@ -76,7 +82,7 @@ public class VisibilityManager : MonoBehaviour
         _visibilityMaskShader.SetInt("VisibilityMaskHeight", VisibilityMask.height);
         _visibilityMaskShader.SetFloat("MinAlpha", _minAlpha);
         _visibilityMaskShader.Dispatch(0, VisibilityMask.width / 8, VisibilityMask.height / 8, 1);
-        // TODO: MOVE TO COMPUTE SHADER
+        // TODO: MOVE TO RENDER PIPELINE
         if (updateFogOfWar)
         {
             _fogOfWarMaskShader.SetTexture(0, "VisibilityMask", VisibilityMask);
