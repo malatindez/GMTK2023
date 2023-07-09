@@ -15,11 +15,13 @@ public class ButtonFocusManager : MonoBehaviour, IPointerEnterHandler
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        Debug.Log("OnPointerEnter");
         FocusVisual.Instance.SetTarget(_button);
     }
 
-    private void Start()
+    private void Awake()
     {
+        Debug.Log("Start");
         _button = GetComponent<Button>();
         _rectTransform = GetComponent<RectTransform>();
 
@@ -29,6 +31,8 @@ public class ButtonFocusManager : MonoBehaviour, IPointerEnterHandler
 
     private void OnEnable()
     {
+        Debug.Log("OnEnable");
+
         if (_isDefault && FocusVisual.Instance != null)
         {
             FocusVisual.Instance.SetTarget(_button);
