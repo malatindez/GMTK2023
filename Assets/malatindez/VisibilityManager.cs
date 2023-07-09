@@ -107,7 +107,7 @@ public class VisibilityManager : MonoBehaviour
     [SerializeField] private ComputeShader _fogOfWarMaskShader;
     private RenderTexture _furthestVisibleDistances;
     [SerializeField] private Camera _mapCamera = null;
-    [SerializeField] private RenderTexture _mapDepthTexture;
+    [SerializeField] public RenderTexture _mapDepthTexture;
     private int _maskHeight = 8192;
     private int _maskWidth = 8192;
     [SerializeField] private int _maximumTotalAmountOfRays = 512 * 512;
@@ -237,6 +237,9 @@ public class VisibilityManager : MonoBehaviour
             depthStencilFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.None,
             graphicsFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.R32_SFloat
         };
+        VisibilityMask.Create();
+        FogOfWarMask.Create();
+        _furthestVisibleDistances.Create();
 
         ClearFogOfWarMask();
         ClearVisibilityMask();
