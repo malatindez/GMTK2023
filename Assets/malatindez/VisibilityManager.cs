@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class VisibilityManager : MonoBehaviour
 {
+    // TODO:
+    // Update the visibility cone so it depends on the point's height and
+    // computes an angle between the point and the camera to check if there's an intersection.
     #region Methods
 
     public void GetCameraBounds()
