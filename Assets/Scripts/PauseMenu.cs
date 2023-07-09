@@ -23,6 +23,12 @@ public class PauseMenu : MonoBehaviour
         }
     }
 
+    public void Continue()
+    {
+        _menu.SetActive(false);
+        Time.timeScale = 1f;
+    }
+
     public void Options()
     {
 
