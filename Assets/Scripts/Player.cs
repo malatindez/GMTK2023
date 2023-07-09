@@ -17,7 +17,16 @@ public class Player : Character
 
     public void TryKill()
 	{
-		SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+		StartCoroutine(Kill());
+	}
+
+	private IEnumerator Kill()
+	{
+		Time.timeScale = 0f;
+		DeathScreen.Instance.Show();
+        yield return new WaitForSecondsRealtime(2f);
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 	}
 
 	private IEnumerator Spawn()
