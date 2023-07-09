@@ -69,7 +69,7 @@ void CSMain(uint3 id : SV_DispatchThreadID)
 #endif
         return;
     }
-    Result[id.xy] = lerp(MinAlpha, 1.0f,
+    Result[id.xy] = lerp(0.0f, 1.0f,
         (
             dot(normalizedToPixel, RayDirection) - cos(halfViewAngle)
         ) / ( // -------------------------------

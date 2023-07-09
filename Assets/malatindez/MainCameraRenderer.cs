@@ -10,17 +10,8 @@ public class MainCameraRenderer : ScriptableRendererFeature
     public static RenderTexture worldTexture { get; set; }
     public static RenderTexture visibilityFogOfWarTexture { get; set; }
     public static RenderTexture visibilityTexture { get; set; }
-    public static RenderTexture UVPrepassTexture { get; set; }
-    public static Matrix4x4 orthoProj { get; set; } = Matrix4x4.identity;
-    public static Matrix4x4 orthoView { get; set; } = Matrix4x4.identity;
-    public static Matrix4x4 invMainProj { get; set; } = Matrix4x4.identity;
-    public static Matrix4x4 invMainView { get; set; } = Matrix4x4.identity;
-    public static Matrix4x4 MainProj { get; set; } = Matrix4x4.identity;
-    public static Matrix4x4 MainView { get; set; } = Matrix4x4.identity;
     public static Matrix4x4 InvPerspectiveViewProj { get; set; } = Matrix4x4.identity;
     public static Matrix4x4 OrthoViewProj { get; set; } = Matrix4x4.identity;
-    public static float PerspectiveAspectRatio { get; set; } = 1.0f;
-    public static float OrthoAspectRatio { get; set; } = 1.0f;
     
     private class CustomRenderPass : ScriptableRenderPass
     {
@@ -49,25 +40,15 @@ public class MainCameraRenderer : ScriptableRendererFeature
 
             RenderTargetIdentifier source = renderingData.cameraData.renderer.cameraColorTarget;
 
-            material.SetMatrix("_OrthoProj", orthoProj);
-            material.SetMatrix("_OrthoView", orthoView);
-            material.SetMatrix("_InvMainProj", invMainProj);
-            material.SetMatrix("_InvMainView", invMainView);
-            material.SetMatrix("_MainProj", MainProj);
-            material.SetMatrix("_MainView", MainView);
-
-            material.SetMatrix("_InvPerspectiveViewProj", InvPerspectiveViewProj);
+            material.SetMatrix("_InvViewProj", InvPerspectiveViewProj);
             material.SetMatrix("_OrthoViewProj", OrthoViewProj);
+            material.SetVector("_ImageDimensions", new Vector2(environmentTexture.width, environmentTexture.height));
 
-            material.SetFloat("_PerspectiveAspectRatio", PerspectiveAspectRatio);
-            material.SetFloat("_OrthoAspectRatio", OrthoAspectRatio);
-            material.SetVector("_TestVector", new Vector3(1, 0, 0));
             material.SetTexture("_EnvironmentTex", environmentTexture);
             material.SetTexture("_EnvironmentDepthTex", environmentDepthTexture);
             material.SetTexture("_WorldTex", worldTexture);
             material.SetTexture("_VisibilityFogOfWarTex", visibilityFogOfWarTexture);
             material.SetTexture("_VisibilityTex", visibilityTexture);
-            material.SetTexture("_UVPrepassTexture", UVPrepassTexture);
 
             // Apply the shader pass
             cmd.Blit(source, tempTargetHandle.Identifier(), material);

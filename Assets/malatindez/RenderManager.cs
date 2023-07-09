@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 
 [RequireComponent(typeof(Camera))]
@@ -16,17 +17,11 @@ public class RenderManager : MonoBehaviour
     [SerializeField] private RenderTexture _environmentRenderDepthTexture;
     [SerializeField] private RenderTexture _mapDepthTexture;
     [SerializeField] private VisibilityManager _visibilityManager;
-    [SerializeField] private ComputeShader _UVPrepassShader;
-    private RenderTexture _UVPrepassTexture = null;
     private Camera _displayCamera;
     // Start is called before the first frame update
     private void Start()
     {
         _displayCamera = GetComponent<Camera>();
-        _UVPrepassTexture = new RenderTexture(16, 16, UnityEngine.Experimental.Rendering.GraphicsFormat.R16G16_SFloat, UnityEngine.Experimental.Rendering.GraphicsFormat.None)
-        {
-            enableRandomWrite = true
-        };
         _ = StartCoroutine(SkipFirst());
     }
 
@@ -94,13 +89,8 @@ public class RenderManager : MonoBehaviour
         MainCameraRenderer.visibilityFogOfWarTexture = _visibilityManager.FogOfWarMask;
         MainCameraRenderer.visibilityTexture = _visibilityManager.VisibilityMask;
 
-        MainCameraRenderer.PerspectiveAspectRatio = _environmentDepthRenderer.aspect;
-        MainCameraRenderer.OrthoAspectRatio = _mapRenderer.aspect;
-
         Matrix4x4 viewMatrix = _environmentDepthRenderer.worldToCameraMatrix;
-        Matrix4x4 projectionMatrix = _environmentDepthRenderer.projectionMatrix;
 
-        Matrix4x4 gpuProjectionMatrix = GL.GetGPUProjectionMatrix(_environmentDepthRenderer.projectionMatrix, true);
         Matrix4x4 gpuProjectionMatrixF = GL.GetGPUProjectionMatrix(_environmentDepthRenderer.projectionMatrix, false);
 
         Matrix4x4 viewProjectionMatrix = gpuProjectionMatrixF * viewMatrix;
@@ -109,43 +99,13 @@ public class RenderManager : MonoBehaviour
         Matrix4x4 orthoViewMatrix = _mapRenderer.worldToCameraMatrix;
         Matrix4x4 orthoProjectionMatrix = _mapRenderer.projectionMatrix;
 
-
         Matrix4x4 orthoViewProjectionMatrix = orthoProjectionMatrix * orthoViewMatrix;
 
-        _UVPrepassShader.SetMatrix("_InvViewProj", inverseViewProjectionMatrix);
-
-        _UVPrepassShader.SetTexture(0, "_EnvironmentTex", _environmentRenderTexture);
-        _UVPrepassShader.SetTexture(0, "_EnvironmentDepthTex", _environmentRenderDepthTexture);
-
-        _UVPrepassShader.SetMatrix("_InvPerspectiveView", viewMatrix.inverse);
-        _UVPrepassShader.SetMatrix("_InvPerspectiveProj", gpuProjectionMatrixF.inverse);
-        _UVPrepassShader.SetMatrix("_InvPerspectiveViewProj", inverseViewProjectionMatrix);
-        _UVPrepassShader.SetMatrix("_OrthoViewProj", orthoViewProjectionMatrix);
-
-        _UVPrepassShader.SetFloat("_PerspectiveAspectRatio", MainCameraRenderer.PerspectiveAspectRatio);
-        _UVPrepassShader.SetFloat("_OrthoAspectRatio", MainCameraRenderer.OrthoAspectRatio);
-        
-        _UVPrepassShader.SetFloat("_zNear", _environmentDepthRenderer.nearClipPlane);
-        _UVPrepassShader.SetFloat("_zFar", _environmentDepthRenderer.farClipPlane);
-
-        _UVPrepassShader.SetVector("_CameraPosition", _environmentDepthRenderer.transform.position);
-
-        _UVPrepassShader.SetVector("_ImageDimensions", new Vector2(_UVPrepassTexture.width, _UVPrepassTexture.height));
-        
-        _UVPrepassShader.SetTexture(0, "Result", _UVPrepassTexture);
-
-        _UVPrepassShader.Dispatch(0, _UVPrepassTexture.width / 8, _UVPrepassTexture.height / 8, 1);
-
-        MainCameraRenderer.UVPrepassTexture = _UVPrepassTexture;
+        MainCameraRenderer.InvPerspectiveViewProj = inverseViewProjectionMatrix;
+        MainCameraRenderer.OrthoViewProj = orthoViewProjectionMatrix;
 
         UpdateTextureIfResolutionChanged(ref _mainRenderTexture, _mainRenderer);
         UpdateTextureIfResolutionChanged(ref _environmentRenderTexture, _environmentRenderer);
         UpdateDepthTextureIfResolutionChanged(ref _environmentRenderDepthTexture, _environmentDepthRenderer);
-
-        if(UpdateTextureIfResolutionChanged(_UVPrepassTexture))
-        {
-            _UVPrepassTexture.enableRandomWrite = true;
-        }
-        _UVPrepassTexture.Create();
     }
 }

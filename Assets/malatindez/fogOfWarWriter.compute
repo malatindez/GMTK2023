@@ -11,6 +11,11 @@ void CSMain(uint3 id : SV_DispatchThreadID)
 {
     if (VisibilityMask[id.xy] > 0.0f && VisibilityMask[id.xy] > FogOfWarMask[id.xy])
     {
-        FogOfWarMask[id.xy] = VisibilityMask[id.xy];
+        float t = VisibilityMask[id.xy];
+        FogOfWarMask[id.xy] += t / 250;
+        if (FogOfWarMask[id.xy] > 0.3)
+        {
+            FogOfWarMask[id.xy] = 0.3;
+        }
     }
 }
