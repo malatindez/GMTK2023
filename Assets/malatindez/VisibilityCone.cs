@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 [ExecuteInEditMode]
 public class VisibilityCone : MonoBehaviour
@@ -14,30 +15,9 @@ public class VisibilityCone : MonoBehaviour
 
     #region Methods
 
-
-    private void Update()
+    private void Start()
     {
-        // if not editor
-        if (Application.isPlaying)
-        {
-            visibilityManager.UpdateVisibilityMask(
-                               transform.forward,
-                                              transform.position,
-                                                             viewAngle,
-                                                                            viewDistance,
-                                                                                           numRaysPerDegree,
-                                                                                                          numSteps,
-                                                                                                                         true
-                                                                                                                                        );
-            if (enableDebugRaysInGame)
-            {
-                drawDebugRays();
-            }
-        }
-        else if (enableDebugRays)
-        {
-            drawDebugRays();
-        }
+        StartCoroutine(SkipFirst());
     }
 
     private void drawDebugRays()
@@ -47,6 +27,37 @@ public class VisibilityCone : MonoBehaviour
             float angle = ((float)i / numRaysPerDegree) - (viewAngle / 2.0f);
             Vector3 dir = Quaternion.AngleAxis(angle, Vector3.up) * transform.forward;
             Debug.DrawRay(transform.position, dir * viewDistance, Color.red);
+        }
+    }
+
+    private IEnumerator SkipFirst()
+    {
+        yield return null; // skip first update
+
+        while (true)
+        {
+            if (Application.isPlaying)
+            {
+                visibilityManager.UpdateVisibilityMask(
+                    transform.forward,
+                    transform.position,
+                    viewAngle,
+                    viewDistance,
+                    numRaysPerDegree,
+                    numSteps,
+                    true);
+
+                if (enableDebugRaysInGame)
+                {
+                    drawDebugRays();
+                }
+            }
+            else if (enableDebugRays)
+            {
+                drawDebugRays();
+            }
+
+            yield return null;
         }
     }
 
