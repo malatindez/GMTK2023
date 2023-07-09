@@ -17,7 +17,7 @@ public class VisibilityCone : MonoBehaviour
 
     private void Start()
     {
-        StartCoroutine(SkipFirst());
+        _ = StartCoroutine(SkipFirst());
     }
 
     private void drawDebugRays()

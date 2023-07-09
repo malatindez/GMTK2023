@@ -7,6 +7,8 @@ public class VisibilityManager : MonoBehaviour
     // TODO:
     // Update the visibility cone so it depends on the point's height and
     // computes an angle between the point and the camera to check if there's an intersection.
+    // TODO:
+    // multiple depth maps with different resolution to approximate
     #region Methods
 
     public void GetCameraBounds()
@@ -40,8 +42,8 @@ public class VisibilityManager : MonoBehaviour
         }
         Vector3 unprojectedRayOrigin = _mapCamera.WorldToViewportPoint(worldRayOrigin);
         Vector3 unprojectedRayDirection = _mapCamera.WorldToViewportPoint(worldRayOrigin + worldRayDirection) - unprojectedRayOrigin;
-        var rayOrigin = new Vector2(unprojectedRayOrigin.x, unprojectedRayOrigin.y);
-        var rayDirection = new Vector2(unprojectedRayDirection.x, unprojectedRayDirection.y);
+        Vector2 rayOrigin = new(unprojectedRayOrigin.x, unprojectedRayOrigin.y);
+        Vector2 rayDirection = new(unprojectedRayDirection.x, unprojectedRayDirection.y);
         rayDirection.Normalize();
         float viewDistance = worldViewDistance / _mapCamera.orthographicSize * 2.0f;
         ClearFurthestVisibleDistances();
