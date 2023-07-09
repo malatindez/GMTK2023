@@ -1,0 +1,47 @@
+#pragma kernel ProjectToOrthoUV
+
+Texture2D<float4> _EnvironmentTex;
+Texture2D<float> _EnvironmentDepthTex;
+
+float4x4 _InvViewProj;
+float4x4 _OrthoViewProj;
+
+
+float2 _ImageDimensions;
+
+RWTexture2D<float2> Result;
+
+[numthreads(8, 8, 1)]
+void ProjectToOrthoUV(uint3 id : SV_DispatchThreadID)
+{
+    // Retrieve depth from the environment depth texture
+    float depth = _EnvironmentDepthTex[id.xy].r;
+    if (depth <= 0.001)
+    {
+        Result[id.xy] = float2(0, 0);
+      return;
+    }
+
+    // Compute normalized viewport position in the range [-1, 1]
+    float2 uv = (id.xy * 2.0 - _ImageDimensions) / _ImageDimensions;
+
+    // Unproject the depth and viewport position to homogenized coordinates
+    float4 homogenizedPos = float4(uv.x, uv.y, depth, 1.0);
+    
+    // Transform to world coordinates
+    float4 worldPos = mul(_InvViewProj, homogenizedPos);
+
+    // Divide by w to dehomogenize
+    worldPos /= worldPos.w;
+
+    // Paint Result with worldPos
+    Result[id.xy] = worldPos.xz;
+    
+    // Project from world space to the orthographic projection
+    float4 orthoPos = mul(_OrthoViewProj, worldPos);
+    float2 orthoUV = orthoPos.xy / orthoPos.w;
+    orthoUV = (orthoUV + 1) * 0.5;
+    // convert orthoUV to [0, 1] range
+    
+    Result[id.xy] = orthoUV;
+}
