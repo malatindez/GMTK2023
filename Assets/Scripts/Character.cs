@@ -1,14 +1,15 @@
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(Animator))]
 public class Character : MonoBehaviour
 {
 	[SerializeField, Min(0)] private float _speed = 10;
 	[SerializeField, Min(0)] private float _rotationSpeed = 1;
 
 	protected CharacterController _characterController;
+    protected Animator _animator;
 	private Transform _transform;
-	private Animator _animator;
 	
 	public bool IsWalking
 	{

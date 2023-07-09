@@ -10,6 +10,10 @@ public class Player : Character
 
 	public void TryKill()
 	{
-		Debug.Log("PLAYER DEAD!!!");
+		// [TODO]: fix
+
+		//StopAllCoroutines();
+		//IsWalking = false;
+		//_animator.SetTrigger(Constants.PlayerDiedTrigger);
 	}
 }

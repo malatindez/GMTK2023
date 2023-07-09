@@ -25,7 +25,7 @@ public class CharacterMoveController : MonoBehaviour
 
 	private void Update()
 	{
-		var moveDirection = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+		var moveDirection = new Vector3(Input.GetAxis(Constants.HorizontalAxis), 0, Input.GetAxis(Constants.VerticalAxis));
 
 
 		_target.IsWalking = moveDirection != Vector3.zero;
