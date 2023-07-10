@@ -15,7 +15,7 @@ float HeightDecrease;
 
 int NumSteps;
 int RayTextureSize;
-
+#define ADDITIONAL_PIXELS 10
 float2x2 rotate(float angle)
 {
     return float2x2(
@@ -55,13 +55,13 @@ void VisibilityCone (uint3 id : SV_DispatchThreadID)
     }
     
     // Write furthest visible distance to buffer
-    int x = id.x % RayTextureSize;
+        int x = id.x % RayTextureSize;
     int y = id.x / RayTextureSize;
     int2 texCoord = int2(x,y);
     if (x > RayTextureSize || y > RayTextureSize)
     {
         FurthestVisibleDistances[texCoord] = 0.0f;
     }
-    FurthestVisibleDistances[texCoord] = (float) i;
+    FurthestVisibleDistances[texCoord] = (float) i + ADDITIONAL_PIXELS;
 
 }

@@ -85,7 +85,7 @@ Shader "Unlit/MainCameraRenderer" // DO NOT CHANGE. Main camera renderer feature
                 float4 orthoPos = mul(_OrthoViewProj, worldPos);
                 float2 orthoUV = orthoPos.xy / orthoPos.w;
                 orthoUV = (orthoUV + 1) * 0.5;
-
+//    return float4(orthoUV, 0, 0);
                 float fog = UNITY_SAMPLE_TEX2D(_VisibilityFogOfWarTex, orthoUV);
                 float vis = UNITY_SAMPLE_TEX2D(_VisibilityTex, orthoUV);
 

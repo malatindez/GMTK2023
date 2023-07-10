@@ -116,7 +116,19 @@ public class VisibilityManager : MonoBehaviour
 
         float halfViewAngle = Mathf.Deg2Rad * viewAngle / 2;
         float angleStep = (Mathf.Deg2Rad * viewAngle) / Mathf.Ceil(viewAngle * numRaysPerDegree);
+#if UNITY_EDITOR
+        _visibilityConeShader.SetTexture(0, FurthestVisibleDistancesID, _furthestVisibleDistances);
+        _visibilityConeShader.SetTexture(0, MapDepthTextureID, _mapDepthTexture);
+        _visibilityConeShader.SetInt(RayTextureSizeID, _rayTextureSize);
 
+
+        _visibilityMaskShader.SetTexture(0, FurthestVisibleDistancesID, _furthestVisibleDistances);
+        _visibilityMaskShader.SetTexture(0, DepthMapID, _mapDepthTexture);
+        _visibilityMaskShader.SetTexture(0, ResultID, VisibilityMask);
+        _visibilityMaskShader.SetInt(VisibilityMaskWidthID, VisibilityMask.width);
+        _visibilityMaskShader.SetInt(VisibilityMaskHeightID, VisibilityMask.height);
+        _visibilityMaskShader.SetInt(RayTextureSizeID, _rayTextureSize);
+#endif
 
         ClearFurthestVisibleDistances();
         int numRays = Mathf.CeilToInt(viewAngle * numRaysPerDegree);
