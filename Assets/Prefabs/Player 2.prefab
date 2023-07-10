@@ -79,7 +79,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   visibilityManager: {fileID: 0}
   numRaysPerDegree: 30
-  numSteps: 256
+  numSteps: 1024
   viewAngle: 90
   viewDistance: 10
   enableDebugRays: 0

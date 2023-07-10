@@ -62454,8 +62454,8 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
-  far clip plane: 20
+  near clip plane: 0.01
+  far clip plane: 5
   field of view: 60
   orthographic: 1
   orthographic size: 29
@@ -62551,7 +62551,7 @@ MonoBehaviour:
   _mapCamera: {fileID: 1083827850085527736}
   _mapDepthTexture: {fileID: 8400000, guid: 4d42ddf787773a34980404892f5d82a0, type: 2}
   _maximumTotalAmountOfRays: 262144
-  _minDepth: 0.95
+  _minDepth: 0.55
   _visibilityConeShader: {fileID: 7200000, guid: d53800d7f873bd24a99b8051b856e78a,
     type: 3}
   _visibilityMaskShader: {fileID: 7200000, guid: d14a3b7a73ca9314ea434c7ffdffd1ae,
@@ -62577,7 +62577,7 @@ GameObject:
   m_TagString: MapCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &4010665329279397381
 Transform:
@@ -62646,7 +62646,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3745200539771320626}
   m_LocalRotation: {x: -0.5, y: 0.5, z: -0.5, w: -0.5}
-  m_LocalPosition: {x: 10.7, y: 3.1, z: 25.7}
+  m_LocalPosition: {x: 10.7, y: 3.57, z: 25.7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
