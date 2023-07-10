@@ -1,0 +1,17 @@
+#pragma kernel DepthToBuffer
+
+Texture2D<float> _MainTex;
+int _Width;
+int _Height;
+RWStructuredBuffer<float> _Buffer;
+
+[numthreads(8, 8, 1)]
+void DepthToBuffer(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= _Width || id.y >= _Height)
+        return;
+    
+    int index = id.y * _Width + id.x;
+    float4 pixel = _MainTex[id.xy];
+    _Buffer[index] = pixel.r;
+}
