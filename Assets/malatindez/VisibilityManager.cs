@@ -82,24 +82,6 @@ public class VisibilityManager : MonoBehaviour
         _visibilityMaskShader.SetInt("VisibilityMaskHeight", VisibilityMask.height);
         _visibilityMaskShader.SetFloat("MinAlpha", _minAlpha);
         _visibilityMaskShader.Dispatch(0, VisibilityMask.width / 8, VisibilityMask.height / 8, 1);
-        // TODO: MOVE TO RENDER PIPELINE
-        if (updateFogOfWar)
-        {
-            _fogOfWarMaskShader.SetTexture(0, "VisibilityMask", VisibilityMask);
-            _fogOfWarMaskShader.SetTexture(0, "FogOfWarMask", FogOfWarMask);
-            _fogOfWarMaskShader.Dispatch(0, _maskWidth / 8, _maskHeight / 8, 1);
-        }
-        if (_debugRenderMasks)
-        {
-            _debugFogOfWarMaskView = RenderTextureToTexture2DR8(FogOfWarMask);
-            _debugVisibilityMaskView = RenderTextureToTexture2DR8(VisibilityMask);
-            _debugFurthestVisibleDistancesView = RenderTextureToTexture2DR32F(_furthestVisibleDistances);
-            _debugRenderMasks = false;
-            File.WriteAllBytes("FogOfWarMask.png", _debugFogOfWarMaskView.EncodeToPNG());
-            File.WriteAllBytes("VisibilityMask.png", _debugVisibilityMaskView.EncodeToPNG());
-            File.WriteAllBytes("FurthestVisibleDistances.png", _debugFurthestVisibleDistancesView.EncodeToPNG());
-
-        }
     }
     public RenderTexture VisibilityMask { get; private set; }
     public RenderTexture FogOfWarMask { get; private set; }
@@ -218,6 +200,23 @@ public class VisibilityManager : MonoBehaviour
     {
         ClearVisibilityMask();
     }
+    private void LateUpdate()
+    {
+        _fogOfWarMaskShader.SetTexture(0, "VisibilityMask", VisibilityMask);
+        _fogOfWarMaskShader.SetTexture(0, "FogOfWarMask", FogOfWarMask);
+        _fogOfWarMaskShader.Dispatch(0, _maskWidth / 8, _maskHeight / 8, 1);
+        if (_debugRenderMasks)
+        {
+            _debugFogOfWarMaskView = RenderTextureToTexture2DR8(FogOfWarMask);
+            _debugVisibilityMaskView = RenderTextureToTexture2DR8(VisibilityMask);
+            _debugFurthestVisibleDistancesView = RenderTextureToTexture2DR32F(_furthestVisibleDistances);
+            _debugRenderMasks = false;
+            File.WriteAllBytes("FogOfWarMask.png", _debugFogOfWarMaskView.EncodeToPNG());
+            File.WriteAllBytes("VisibilityMask.png", _debugVisibilityMaskView.EncodeToPNG());
+            File.WriteAllBytes("FurthestVisibleDistances.png", _debugFurthestVisibleDistancesView.EncodeToPNG());
+
+        }
+    }
 
     private void Start()
     {
@@ -233,7 +232,7 @@ public class VisibilityManager : MonoBehaviour
         {
             enableRandomWrite = true,
             depthStencilFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.None,
-            graphicsFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.R8_UNorm
+            graphicsFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.R16_UNorm
         };
 
         _rayTextureSize = (int)Math.Sqrt(Math.Pow(2, Math.Ceiling(Math.Log(_maximumTotalAmountOfRays) / Math.Log(2))));

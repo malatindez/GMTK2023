@@ -90,7 +90,8 @@ Shader "Unlit/MainCameraRenderer" // DO NOT CHANGE. Main camera renderer feature
                 float vis = UNITY_SAMPLE_TEX2D(_VisibilityTex, orthoUV);
 
                 return col2 * vis * 0.5 + 
-                    float4(float3(length(col.xyz) / 3, length(col.xyz) / 3, length(col.xyz) / 3) * fog, 1) * 0.1;
+                    float4(float3(length(col.xyz) / 3, length(col.xyz) / 3, length(col.xyz) / 3) * fog, 1) * 0.3
+                + max(0.0f, fog - 0.1f) * col2 * 0.2 ;
 
             }
             ENDCG
