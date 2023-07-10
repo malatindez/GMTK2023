@@ -8,7 +8,6 @@ int2 RayOriginPixels;
 float Height;
 float HeightDecrease;
 float2 RayDirection;
-float Step;
 float ViewAngle;
 float ViewDistance;
 int NumRaysPerDegree;
@@ -51,12 +50,12 @@ void VisibilityCone (uint3 id : SV_DispatchThreadID)
         // If we hit something, break out of the loop
         if (Height < depth)
         {
-            t += Step;
+            t += 1.0f;
             break;
         }
 
         // Move further along the ray
-        t += Step;
+        t += 1.0f;
         Height -= HeightDecrease * 2;
     }
     

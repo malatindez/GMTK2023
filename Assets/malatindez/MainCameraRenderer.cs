@@ -17,6 +17,14 @@ public class MainCameraRenderer : ScriptableRendererFeature
     {
         public Material material = null;
         private RenderTargetHandle tempTargetHandle;
+        private readonly int _InvViewProjID = Shader.PropertyToID("_InvViewProj");
+        private readonly int _OrthoViewProjID = Shader.PropertyToID("_OrthoViewProj");
+        private readonly int _ImageDimensionsID = Shader.PropertyToID("_ImageDimensions");
+        private readonly int _EnvironmentTexID = Shader.PropertyToID("_EnvironmentTex");
+        private readonly int _EnvironmentDepthTexID = Shader.PropertyToID("_EnvironmentDepthTex");
+        private readonly int _WorldTexID = Shader.PropertyToID("_WorldTex");
+        private readonly int _VisibilityFogOfWarTexID = Shader.PropertyToID("_VisibilityFogOfWarTex");
+        private readonly int _VisibilityTexID = Shader.PropertyToID("_VisibilityTex");
 
         public CustomRenderPass()
         {
@@ -40,15 +48,15 @@ public class MainCameraRenderer : ScriptableRendererFeature
 
             RenderTargetIdentifier source = renderingData.cameraData.renderer.cameraColorTarget;
 
-            material.SetMatrix("_InvViewProj", InvPerspectiveViewProj);
-            material.SetMatrix("_OrthoViewProj", OrthoViewProj);
-            material.SetVector("_ImageDimensions", new Vector2(environmentTexture.width, environmentTexture.height));
+            material.SetMatrix(_InvViewProjID, InvPerspectiveViewProj);
+            material.SetMatrix(_OrthoViewProjID, OrthoViewProj);
+            material.SetVector(_ImageDimensionsID, new Vector2(environmentTexture.width, environmentTexture.height));
 
-            material.SetTexture("_EnvironmentTex", environmentTexture);
-            material.SetTexture("_EnvironmentDepthTex", environmentDepthTexture);
-            material.SetTexture("_WorldTex", worldTexture);
-            material.SetTexture("_VisibilityFogOfWarTex", visibilityFogOfWarTexture);
-            material.SetTexture("_VisibilityTex", visibilityTexture);
+            material.SetTexture(_EnvironmentTexID, environmentTexture);
+            material.SetTexture(_EnvironmentDepthTexID, environmentDepthTexture);
+            material.SetTexture(_WorldTexID, worldTexture);
+            material.SetTexture(_VisibilityFogOfWarTexID, visibilityFogOfWarTexture);
+            material.SetTexture(_VisibilityTexID, visibilityTexture);
 
             // Apply the shader pass
             cmd.Blit(source, tempTargetHandle.Identifier(), material);
