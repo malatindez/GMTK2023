@@ -43,7 +43,6 @@ public class VisibilityManager : MonoBehaviour
     private static readonly int ViewAngleID = Shader.PropertyToID("ViewAngle");
     private static readonly int NumStepsID = Shader.PropertyToID("NumSteps");
     private static readonly int NumRaysPerDegreeID = Shader.PropertyToID("NumRaysPerDegree");
-    private static readonly int MinDepthID = Shader.PropertyToID("MinDepth");
     private static readonly int RayTextureSizeID = Shader.PropertyToID("RayTextureSize");
     private static readonly int DepthMapID = Shader.PropertyToID("DepthMap");
     private static readonly int ResultID = Shader.PropertyToID("Result");
@@ -55,6 +54,9 @@ public class VisibilityManager : MonoBehaviour
     private static readonly int ClearColorID = Shader.PropertyToID("ClearColor");
     private static readonly int VisibilityMaskID = Shader.PropertyToID("VisibilityMask");
     private static readonly int FogOfWarMaskID = Shader.PropertyToID("FogOfWarMask");
+    private static readonly int HalfViewAngleID = Shader.PropertyToID("HalfViewAngle");
+    private static readonly int AngleStepID = Shader.PropertyToID("AngleStep");
+
 
     public void UpdateVisibilityMask(
         Vector3 worldRayDirection,
@@ -101,7 +103,9 @@ public class VisibilityManager : MonoBehaviour
             pixelStep = pixelStepSize.magnitude;
             rayOriginPixels = new int[] { (int)(rayOrigin.x * _mapDepthTexture.width), (int)(rayOrigin.y * _mapDepthTexture.height) };
             // normalize height decrease
-            heightDecrease *= pixelStep;
+            Vector3 heightStepSize = rayOrigin - _mapCamera.WorldToViewportPoint(worldRayOrigin + Vector3.down);
+            // normalize height decrease
+            heightDecrease *= pixelStep / 2;
         }
 
         // if the amount of pixels on the diagonal is less than the amount of rays
@@ -110,17 +114,24 @@ public class VisibilityManager : MonoBehaviour
         int diagonalPixelAmount = (int)new Vector2(_mapDepthTexture.width, _mapDepthTexture.height).magnitude;
         maximumAmountOfStepsPerRay = Math.Min(maximumAmountOfStepsPerRay, (int)(worldViewDistance * pixelStep * diagonalPixelAmount));
 
+        float halfViewAngle = Mathf.Deg2Rad * viewAngle / 2;
+        float angleStep = (Mathf.Deg2Rad * viewAngle) / Mathf.Ceil(viewAngle * numRaysPerDegree);
+
+
         ClearFurthestVisibleDistances();
         int numRays = Mathf.CeilToInt(viewAngle * numRaysPerDegree);
         _visibilityConeShader.SetVector(MapDepthTextureSizeID, new Vector2(_mapDepthTexture.width, _mapDepthTexture.height));
         _visibilityConeShader.SetInts(RayOriginPixelsID, rayOriginPixels);
+        _visibilityConeShader.SetVector(RayDirectionID, rayDirection);
+        
         _visibilityConeShader.SetFloat(HeightID, height);
         _visibilityConeShader.SetFloat(HeightDecreaseID, heightDecrease);
-        _visibilityConeShader.SetVector(RayDirectionID, rayDirection);
-        _visibilityConeShader.SetFloat(ViewAngleID, viewAngle);
+
+        _visibilityConeShader.SetFloat(HalfViewAngleID, halfViewAngle);
+        _visibilityConeShader.SetFloat(AngleStepID, angleStep);
+
         _visibilityConeShader.SetInt(NumStepsID, maximumAmountOfStepsPerRay);
-        _visibilityConeShader.SetInt(NumRaysPerDegreeID, numRaysPerDegree);
-        _visibilityConeShader.SetFloat(MinDepthID, _minDepth);
+        
         int threadGroups = Mathf.CeilToInt(numRays / 64.0f);
         _visibilityConeShader.Dispatch(0, threadGroups, 1, 1);
 
@@ -147,7 +158,6 @@ public class VisibilityManager : MonoBehaviour
     private int _maskHeight = 8192;
     private int _maskWidth = 8192;
     [SerializeField] private int _maximumTotalAmountOfRays = 1024 * 1024;
-    [SerializeField] private float _minDepth = 0.5f;
     private int _rayTextureSize;
     [SerializeField] private ComputeShader _visibilityConeShader;
     [SerializeField] private ComputeShader _visibilityMaskShader;

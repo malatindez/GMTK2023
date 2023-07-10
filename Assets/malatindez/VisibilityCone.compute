@@ -5,12 +5,14 @@ Texture2D<float> MapDepthTexture;
 float2 MapDepthTextureSize;
 
 int2 RayOriginPixels;
+float2 RayDirection;
+
+float HalfViewAngle;
+float AngleStep;
+
 float Height;
 float HeightDecrease;
-float2 RayDirection;
-float ViewAngle;
-float ViewDistance;
-int NumRaysPerDegree;
+
 int NumSteps;
 int RayTextureSize;
 
@@ -24,23 +26,20 @@ float2x2 rotate(float angle)
 [numthreads(64, 1, 1)]
 void VisibilityCone (uint3 id : SV_DispatchThreadID)
 {
-    float halfViewAngle = radians(ViewAngle / 2.0f);
-    int numRays = ceil(ViewAngle * NumRaysPerDegree);
-    float angleStep = radians(ViewAngle) / (float) (numRays - 1);
-
     // find the angle depending on ray index.
-    float angle = -halfViewAngle + id.x * angleStep;
+    float angle = -HalfViewAngle + id.x * AngleStep;
     float2 direction = mul(rotate(angle), RayDirection.xy);
-   
-    direction = normalize(direction);
 
-    float t = 0.0;
+    direction = normalize(direction);
     
+    float2 texPosPixels = RayOriginPixels;
+        
     // Raymarch through the depth map
-    for (int i = 0; i < NumSteps; i++)
+    int i = 0;
+    for (; i < NumSteps; i++)
     {
-        float2 texPosPixels = RayOriginPixels + direction * t;
-        if (texPosPixels.x < 0.0 || texPosPixels.x > MapDepthTextureSize.x || 
+        texPosPixels += direction;
+        if (texPosPixels.x < 0.0 || texPosPixels.x > MapDepthTextureSize.x ||
             texPosPixels.y < 0.0 || texPosPixels.y > MapDepthTextureSize.y)
         {
             break;
@@ -50,13 +49,9 @@ void VisibilityCone (uint3 id : SV_DispatchThreadID)
         // If we hit something, break out of the loop
         if (Height < depth)
         {
-            t += 1.0f;
             break;
         }
-
-        // Move further along the ray
-        t += 1.0f;
-        Height -= HeightDecrease * 2;
+        Height -= HeightDecrease;
     }
     
     // Write furthest visible distance to buffer
@@ -67,6 +62,6 @@ void VisibilityCone (uint3 id : SV_DispatchThreadID)
     {
         FurthestVisibleDistances[texCoord] = 0.0f;
     }
-    FurthestVisibleDistances[texCoord] = 0.05f + t;
+    FurthestVisibleDistances[texCoord] = (float) i;
 
 }
