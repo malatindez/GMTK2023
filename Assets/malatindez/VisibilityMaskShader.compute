@@ -7,11 +7,12 @@
 RWTexture2D<float> FurthestVisibleDistances;
 Texture2D<float> DepthMap;
 RWTexture2D<float> Result;
-float2 RayOrigin;
+
+int2 RayOriginPixels;
 float2 RayDirection;
 float ViewAngle;
-float ViewDistance;
 int NumRaysPerDegree;
+
 int RayTextureSize;
 int VisibilityMaskWidth;
 int VisibilityMaskHeight;
@@ -30,11 +31,11 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     uint numRays = ceil(ViewAngle * NumRaysPerDegree);
     float angleStep = radians(ViewAngle) / (float) (numRays - 1);
 
-    float2 worldPos = id.xy / float2(VisibilityMaskWidth, VisibilityMaskHeight);
-    float2 toPixel = worldPos.xy - RayOrigin;
+    float2 toPixel = (int2) id.xy - RayOriginPixels;
+
     float distance = length(toPixel.xy);
     float2 normalizedToPixel = normalize(toPixel.xy);
-    
+
     if (acos(dot(normalizedToPixel, RayDirection)) > halfViewAngle)
     {
         Result[id.xy] = 0;

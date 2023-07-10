@@ -6,7 +6,7 @@ public class VisibilityCone : MonoBehaviour
     #region Fields
     [SerializeField] private VisibilityManager visibilityManager;
     public int numRaysPerDegree = 30;
-    public int numSteps = 1024;
+    public int maximumAmountOfStepsPerRay = 1024;
     public float viewAngle = 90.0f;
     public float viewDistance = 10.0f;
     public bool enableDebugRays = true;
@@ -44,8 +44,7 @@ public class VisibilityCone : MonoBehaviour
                     viewAngle,
                     viewDistance,
                     numRaysPerDegree,
-                    numSteps,
-                    true);
+                    maximumAmountOfStepsPerRay);
 
                 if (enableDebugRaysInGame)
                 {

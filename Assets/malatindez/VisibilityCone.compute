@@ -3,13 +3,16 @@
 RWTexture2D<float> FurthestVisibleDistances;
 Texture2D<float> MapDepthTexture;
 float2 MapDepthTextureSize;
-float3 RayOrigin;
-float3 RayDirection;
+
+int2 RayOriginPixels;
+float Height;
+float HeightDecrease;
+float2 RayDirection;
+float Step;
 float ViewAngle;
 float ViewDistance;
 int NumRaysPerDegree;
 int NumSteps;
-float MinDepth;
 int RayTextureSize;
 
 float2x2 rotate(float angle)
@@ -17,31 +20,6 @@ float2x2 rotate(float angle)
     return float2x2(
         cos(angle), -sin(angle),
         sin(angle), cos(angle));
-}
-
-void Raymarch(inout float t, float2 rayOrigin, float2 direction, float dt)
-{
-    // Raymarch through the depth map
-    for(int i = 0; i < NumSteps; i++) {
-        float2 currentPos = rayOrigin + direction * t;
-        float2 texPos = currentPos.xy;
-        if(texPos.x < 0.0 || texPos.x > 1.0 || texPos.y < 0.0 || texPos.y > 1.0) {
-            break;
-        }
-        int3 texPosPixels = int3(texPos.xy * MapDepthTextureSize, 0);
-        // Sample the depth map
-        float depth = MapDepthTexture.Load(texPosPixels).r;
-
-        // If we hit something, break out of the loop
-        if (MinDepth < depth)
-        {
-            t += 5 * dt;
-            break;
-        }
-
-        // Move further along the ray
-        t += dt;
-    }
 }
 
 [numthreads(64, 1, 1)]
@@ -54,27 +32,42 @@ void VisibilityCone (uint3 id : SV_DispatchThreadID)
     // find the angle depending on ray index.
     float angle = -halfViewAngle + id.x * angleStep;
     float2 direction = mul(rotate(angle), RayDirection.xy);
-    float2 rayOrigin = RayOrigin.xy;
-    
+   
     direction = normalize(direction);
 
     float t = 0.0;
     
-    // Step size
-    float dt = ViewDistance / (float)NumSteps;
-    Raymarch(t, rayOrigin, direction, dt);
+    // Raymarch through the depth map
+    for (int i = 0; i < NumSteps; i++)
+    {
+        float2 texPosPixels = RayOriginPixels + direction * t;
+        if (texPosPixels.x < 0.0 || texPosPixels.x > MapDepthTextureSize.x || 
+            texPosPixels.y < 0.0 || texPosPixels.y > MapDepthTextureSize.y)
+        {
+            break;
+        }
+        // Sample the depth map
+        float depth = MapDepthTexture[int2(texPosPixels)].r;
+        // If we hit something, break out of the loop
+        if (Height < depth)
+        {
+            t += Step;
+            break;
+        }
 
-    // find the closest point
-    dt = dt / (float)NumSteps;
-    Raymarch(t, rayOrigin, direction, dt);
-
+        // Move further along the ray
+        t += Step;
+        Height -= HeightDecrease * 2;
+    }
+    
     // Write furthest visible distance to buffer
     int x = id.x % RayTextureSize;
     int y = id.x / RayTextureSize;
     int2 texCoord = int2(x,y);
     if (x > RayTextureSize || y > RayTextureSize)
     {
-        FurthestVisibleDistances[texCoord] = 0;
+        FurthestVisibleDistances[texCoord] = 0.0f;
     }
-    FurthestVisibleDistances[texCoord] = min(t, ViewDistance);
+    FurthestVisibleDistances[texCoord] = 0.05f + t;
+
 }

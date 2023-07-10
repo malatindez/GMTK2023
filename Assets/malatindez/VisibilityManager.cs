@@ -38,32 +38,66 @@ public class VisibilityManager : MonoBehaviour
         float viewAngle,
         float worldViewDistance,
         int numRaysPerDegree,
-        int numSteps,
-        bool updateFogOfWar = true
+        int maximumAmountOfStepsPerRay
         )
     {
-        if (numSteps <= 1 || numRaysPerDegree <= 0 || viewAngle < 0)
+        if (maximumAmountOfStepsPerRay <= 1 || numRaysPerDegree <= 0 || viewAngle < 0 || maximumAmountOfStepsPerRay * numRaysPerDegree >= _maximumTotalAmountOfRays)
         {
             Debug.LogWarning("Invalid parameters for visibility mask calculation");
             return;
         }
-        Vector3 rayOrigin = _mapCamera.WorldToViewportPoint(worldRayOrigin);
-        Vector3 unprojectedRayDirection = _mapCamera.WorldToViewportPoint(worldRayOrigin + worldRayDirection) - rayOrigin;
-        Vector2 rayDirection = new Vector2(unprojectedRayDirection.x, unprojectedRayDirection.y);
-        float viewDistance = worldViewDistance * rayDirection.magnitude;
-        rayDirection.Normalize();
+        Vector2 rayOriginUV;
+        int[] rayOriginPixels;
+        float height;
+        Vector2 rayDirection;
+        float heightDecrease;
+        float pixelStep;
+
+        {
+            Vector3 rayOrigin = _mapCamera.WorldToViewportPoint(worldRayOrigin);
+            Vector3 unprojectedRayDirection = _mapCamera.WorldToViewportPoint(worldRayOrigin + worldRayDirection) - rayOrigin;
+            
+            rayOriginUV = new Vector2(rayOrigin.x, rayOrigin.y);
+
+            // convert to depth viewport coordinates
+            height = 1 - (rayOrigin.z - _mapCamera.nearClipPlane) / (_mapCamera.farClipPlane - _mapCamera.nearClipPlane);
+            heightDecrease = (unprojectedRayDirection.z - _mapCamera.nearClipPlane) / (_mapCamera.farClipPlane - _mapCamera.nearClipPlane);
+
+            rayDirection = new Vector2(
+                unprojectedRayDirection.x,
+                unprojectedRayDirection.y
+            );
+            unprojectedRayDirection.x = rayDirection.x;
+            unprojectedRayDirection.y = rayDirection.y;
+            rayDirection.Normalize();
+
+            Vector3 pixelStepSize = rayOrigin - _mapCamera.WorldToViewportPoint(worldRayOrigin + Vector3.right);
+            pixelStep = pixelStepSize.magnitude;
+            rayOriginPixels = new int[] { (int)(rayOrigin.x * _mapDepthTexture.width), (int)(rayOrigin.y * _mapDepthTexture.height) };
+            // normalize height decrease
+            heightDecrease *= pixelStep;
+        }
+
+        // if the amount of pixels on the diagonal is less than the amount of rays
+        // we need to decrease amount of rays because it wouldn't make sense to have more steps than amount of we can see
+
+        int diagonalPixelAmount = (int)new Vector2(_mapDepthTexture.width, _mapDepthTexture.height).magnitude;
+        maximumAmountOfStepsPerRay = Math.Min(maximumAmountOfStepsPerRay, (int)(worldViewDistance * pixelStep * diagonalPixelAmount));
+
         ClearFurthestVisibleDistances();
         int numRays = Mathf.CeilToInt(viewAngle * numRaysPerDegree);
         _visibilityConeShader.SetTexture(0, "FurthestVisibleDistances", _furthestVisibleDistances);
         _visibilityConeShader.SetTexture(0, "MapDepthTexture", _mapDepthTexture);
 
         _visibilityConeShader.SetVector("MapDepthTextureSize", new Vector2(_mapDepthTexture.width, _mapDepthTexture.height));
-        _visibilityConeShader.SetVector("RayOrigin", rayOrigin);
+        _visibilityConeShader.SetInts("RayOriginPixels", rayOriginPixels);
+        _visibilityConeShader.SetFloat("Height", height);
+        _visibilityConeShader.SetFloat("HeightDecrease", heightDecrease);
         _visibilityConeShader.SetVector("RayDirection", rayDirection);
         _visibilityConeShader.SetFloat("ViewAngle", viewAngle);
-        _visibilityConeShader.SetFloat("ViewDistance", viewDistance);
+        _visibilityConeShader.SetFloat("Step", 0.9f);
+        _visibilityConeShader.SetInt("NumSteps", maximumAmountOfStepsPerRay);
         _visibilityConeShader.SetInt("NumRaysPerDegree", numRaysPerDegree);
-        _visibilityConeShader.SetInt("NumSteps", numSteps);
         _visibilityConeShader.SetFloat("MinDepth", _minDepth);
         _visibilityConeShader.SetInt("RayTextureSize", _rayTextureSize);
         int threadGroups = Mathf.CeilToInt(numRays / 64.0f);
@@ -72,10 +106,9 @@ public class VisibilityManager : MonoBehaviour
         _visibilityMaskShader.SetTexture(0, "FurthestVisibleDistances", _furthestVisibleDistances);
         _visibilityMaskShader.SetTexture(0, "DepthMap", _mapDepthTexture);
         _visibilityMaskShader.SetTexture(0, "Result", VisibilityMask);
-        _visibilityMaskShader.SetVector("RayOrigin", rayOrigin);
+        _visibilityMaskShader.SetInts("RayOriginPixels", rayOriginPixels);
         _visibilityMaskShader.SetVector("RayDirection", rayDirection);
         _visibilityMaskShader.SetFloat("ViewAngle", viewAngle);
-        _visibilityMaskShader.SetFloat("ViewDistance", viewDistance);
         _visibilityMaskShader.SetInt("NumRaysPerDegree", numRaysPerDegree);
         _visibilityMaskShader.SetInt("RayTextureSize", _rayTextureSize);
         _visibilityMaskShader.SetInt("VisibilityMaskWidth", VisibilityMask.width);
@@ -98,7 +131,7 @@ public class VisibilityManager : MonoBehaviour
     [SerializeField] public RenderTexture _mapDepthTexture;
     private int _maskHeight = 8192;
     private int _maskWidth = 8192;
-    [SerializeField] private int _maximumTotalAmountOfRays = 512 * 512;
+    [SerializeField] private int _maximumTotalAmountOfRays = 1024 * 1024;
     [SerializeField] private float _minDepth = 0.5f;
     private int _rayTextureSize;
     [SerializeField] private ComputeShader _visibilityConeShader;
@@ -112,6 +145,7 @@ public class VisibilityManager : MonoBehaviour
     public Texture2D RenderTextureToTexture2DR8(RenderTexture renderTexture)
     {
         Texture2D tempTexture = new(renderTexture.width, renderTexture.height, TextureFormat.RGBA32, false);
+        tempTexture.hideFlags = HideFlags.HideAndDontSave;
 
         ComputeBuffer buffer = new(renderTexture.width * renderTexture.height * 4, sizeof(float));
 
@@ -135,6 +169,8 @@ public class VisibilityManager : MonoBehaviour
     public Texture2D RenderTextureToTexture2DR32F(RenderTexture renderTexture)
     {
         Texture2D texture = new(renderTexture.width, renderTexture.height, TextureFormat.RFloat, false);
+        texture.hideFlags = HideFlags.HideAndDontSave;
+
         RenderTexture.active = renderTexture;
         texture.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
         texture.Apply();
@@ -207,6 +243,9 @@ public class VisibilityManager : MonoBehaviour
         _fogOfWarMaskShader.Dispatch(0, _maskWidth / 8, _maskHeight / 8, 1);
         if (_debugRenderMasks)
         {
+            Destroy(_debugFogOfWarMaskView);
+            Destroy(_debugVisibilityMaskView);
+            Destroy(_debugFurthestVisibleDistancesView);
             _debugFogOfWarMaskView = RenderTextureToTexture2DR8(FogOfWarMask);
             _debugVisibilityMaskView = RenderTextureToTexture2DR8(VisibilityMask);
             _debugFurthestVisibleDistancesView = RenderTextureToTexture2DR32F(_furthestVisibleDistances);
