@@ -5,12 +5,15 @@ public class VisibilityCone : MonoBehaviour
 {
     #region Fields
     [SerializeField] private VisibilityManager visibilityManager;
+    [SerializeField] private GameObject HighlightCenter;
     public int numRaysPerDegree = 30;
     public int maximumAmountOfStepsPerRay = 1024;
     public float viewAngle = 90.0f;
     public float viewDistance = 10.0f;
     public bool enableDebugRays = true;
     public bool enableDebugRaysInGame = true;
+    public float highlightRadius = 1.0f;
+
     #endregion Fields
 
     #region Methods
@@ -41,10 +44,12 @@ public class VisibilityCone : MonoBehaviour
                 visibilityManager.UpdateVisibilityMask(
                     transform.forward,
                     transform.position,
+                    HighlightCenter.transform.position,
                     viewAngle,
                     viewDistance,
                     numRaysPerDegree,
-                    maximumAmountOfStepsPerRay);
+                    maximumAmountOfStepsPerRay,
+                    highlightRadius);
 
                 if (enableDebugRaysInGame)
                 {

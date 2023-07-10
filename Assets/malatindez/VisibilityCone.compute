@@ -15,6 +15,7 @@ float HeightDecrease;
 
 int NumSteps;
 int RayTextureSize;
+
 #define ADDITIONAL_PIXELS 10
 float2x2 rotate(float angle)
 {
@@ -29,7 +30,6 @@ void VisibilityCone (uint3 id : SV_DispatchThreadID)
     // find the angle depending on ray index.
     float angle = -HalfViewAngle + id.x * AngleStep;
     float2 direction = mul(rotate(angle), RayDirection.xy);
-
     direction = normalize(direction);
     
     float2 texPosPixels = RayOriginPixels;

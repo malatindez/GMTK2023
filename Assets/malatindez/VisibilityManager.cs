@@ -56,15 +56,20 @@ public class VisibilityManager : MonoBehaviour
     private static readonly int FogOfWarMaskID = Shader.PropertyToID("FogOfWarMask");
     private static readonly int HalfViewAngleID = Shader.PropertyToID("HalfViewAngle");
     private static readonly int AngleStepID = Shader.PropertyToID("AngleStep");
-
+    private static readonly int HighlightRadiusID = Shader.PropertyToID("HighlightRadius");
+    private static readonly int InvOrthoMatrixID = Shader.PropertyToID("InvOrthoMatrix");
+    private static readonly int CameraPositionID = Shader.PropertyToID("CameraPosition");
+    private static readonly int HighlightCenterID = Shader.PropertyToID("HighlightCenter");
 
     public void UpdateVisibilityMask(
         Vector3 worldRayDirection,
         Vector3 worldRayOrigin,
+        Vector3 highlightCenter,
         float viewAngle,
         float worldViewDistance,
         int numRaysPerDegree,
-        int maximumAmountOfStepsPerRay
+        int maximumAmountOfStepsPerRay,
+        float highlightRadius
         )
     {
         if (maximumAmountOfStepsPerRay <= 1 || numRaysPerDegree <= 0 || viewAngle < 0 || viewAngle * numRaysPerDegree >= _maximumTotalAmountOfRays)
@@ -130,12 +135,17 @@ public class VisibilityManager : MonoBehaviour
         _visibilityMaskShader.SetInt(RayTextureSizeID, _rayTextureSize);
 #endif
 
+        Matrix4x4 orthoViewMatrix = _mapCamera.worldToCameraMatrix;
+        Matrix4x4 orthoProjectionMatrix = _mapCamera.projectionMatrix;
+
+        Matrix4x4 orthoViewProjectionMatrix = orthoProjectionMatrix * orthoViewMatrix;
+
         ClearFurthestVisibleDistances();
         int numRays = Mathf.CeilToInt(viewAngle * numRaysPerDegree);
         _visibilityConeShader.SetVector(MapDepthTextureSizeID, new Vector2(_mapDepthTexture.width, _mapDepthTexture.height));
         _visibilityConeShader.SetInts(RayOriginPixelsID, rayOriginPixels);
         _visibilityConeShader.SetVector(RayDirectionID, rayDirection);
-        
+
         _visibilityConeShader.SetFloat(HeightID, height);
         _visibilityConeShader.SetFloat(HeightDecreaseID, heightDecrease);
 
@@ -152,6 +162,10 @@ public class VisibilityManager : MonoBehaviour
         _visibilityMaskShader.SetFloat(ViewAngleID, viewAngle);
         _visibilityMaskShader.SetInt(NumRaysPerDegreeID, numRaysPerDegree);
         _visibilityMaskShader.SetFloat(MinAlphaID, _minAlpha);
+        _visibilityMaskShader.SetFloat(HighlightRadiusID, highlightRadius);
+        _visibilityMaskShader.SetMatrix(InvOrthoMatrixID, orthoViewProjectionMatrix.inverse);
+        _visibilityMaskShader.SetVector(CameraPositionID, _mainCamera.transform.position);
+        _visibilityMaskShader.SetVector(HighlightCenterID, highlightCenter);
         _visibilityMaskShader.Dispatch(0, VisibilityMask.width / 8, VisibilityMask.height / 8, 1);
     }
     public RenderTexture VisibilityMask { get; private set; }
@@ -160,12 +174,12 @@ public class VisibilityManager : MonoBehaviour
     #endregion Methods
 
     #region Fields
-
     [SerializeField] private ComputeShader _clearShaderR8;
     [SerializeField] private ComputeShader _clearShaderR8G8B8A8;
     [SerializeField] private ComputeShader _fogOfWarMaskShader;
     private RenderTexture _furthestVisibleDistances;
     [SerializeField] private Camera _mapCamera = null;
+    [SerializeField] private Camera _mainCamera = null;
     [SerializeField] public RenderTexture _mapDepthTexture;
     private int _maskHeight = 8192;
     private int _maskWidth = 8192;

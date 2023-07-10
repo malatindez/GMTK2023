@@ -58,7 +58,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 52603670256616430}
   m_LocalRotation: {x: -0.00008234734, y: 0.014450551, z: -0.0056978734, w: 0.99987936}
-  m_LocalPosition: {x: 0.04, y: 0.68, z: -0.475}
+  m_LocalPosition: {x: 0, y: 0.68, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -78,12 +78,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   visibilityManager: {fileID: 0}
+  HighlightCenter: {fileID: 4733345363016561168}
   numRaysPerDegree: 30
   maximumAmountOfStepsPerRay: 1024
   viewAngle: 90
   viewDistance: 10
   enableDebugRays: 0
   enableDebugRaysInGame: 0
+  highlightRadius: 0.9994
 --- !u!1 &371605356361150963
 GameObject:
   m_ObjectHideFlags: 0
@@ -185,6 +187,7 @@ Transform:
   m_Children:
   - {fileID: 7001744571777767483}
   - {fileID: 3249811216209572662}
+  - {fileID: 2130886629701173203}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
@@ -964,6 +967,37 @@ Transform:
   - {fileID: 6430741597663649970}
   - {fileID: 3169839371544635891}
   m_Father: {fileID: 7916567797297009980}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4733345363016561168
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2130886629701173203}
+  m_Layer: 0
+  m_Name: HighlightCenter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2130886629701173203
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4733345363016561168}
+  m_LocalRotation: {x: -0, y: -0.70710576, z: 0, w: 0.70710784}
+  m_LocalPosition: {x: 0, y: -1, z: 0}
+  m_LocalScale: {x: 6.5723543, y: 6.5723543, z: 6.5723543}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5509715523817055877}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5117923058984471910
