@@ -85,7 +85,7 @@ MonoBehaviour:
   viewDistance: 10
   enableDebugRays: 0
   enableDebugRaysInGame: 0
-  highlightRadius: 0.9994
+  highlightRadius: 0.4
 --- !u!1 &371605356361150963
 GameObject:
   m_ObjectHideFlags: 0

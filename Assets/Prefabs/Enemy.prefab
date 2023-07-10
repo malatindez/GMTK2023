@@ -538,7 +538,7 @@ PrefabInstance:
     - target: {fileID: 9170126105175692954, guid: e86eeef4d585e9844ab9f2e8f088706b,
         type: 3}
       propertyPath: highlightRadius
-      value: 0.9994
+      value: 0.4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

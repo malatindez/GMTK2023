@@ -56,7 +56,7 @@ public class VisibilityManager : MonoBehaviour
     private static readonly int FogOfWarMaskID = Shader.PropertyToID("FogOfWarMask");
     private static readonly int HalfViewAngleID = Shader.PropertyToID("HalfViewAngle");
     private static readonly int AngleStepID = Shader.PropertyToID("AngleStep");
-    private static readonly int HighlightRadiusID = Shader.PropertyToID("HighlightRadius");
+    private static readonly int HighlightAngleID = Shader.PropertyToID("HighlightAngle");
     private static readonly int InvOrthoMatrixID = Shader.PropertyToID("InvOrthoMatrix");
     private static readonly int CameraPositionID = Shader.PropertyToID("CameraPosition");
     private static readonly int HighlightCenterID = Shader.PropertyToID("HighlightCenter");
@@ -121,6 +121,12 @@ public class VisibilityManager : MonoBehaviour
 
         float halfViewAngle = Mathf.Deg2Rad * viewAngle / 2;
         float angleStep = (Mathf.Deg2Rad * viewAngle) / Mathf.Ceil(viewAngle * numRaysPerDegree);
+        
+        float highlightAngle = Vector3.Dot(
+            (worldRayOrigin - _mainCamera.transform.position).normalized,
+            (worldRayOrigin + _mainCamera.transform.up * highlightRadius - _mainCamera.transform.position).normalized
+        );
+
 #if UNITY_EDITOR
         _visibilityConeShader.SetTexture(0, FurthestVisibleDistancesID, _furthestVisibleDistances);
         _visibilityConeShader.SetTexture(0, MapDepthTextureID, _mapDepthTexture);
@@ -162,7 +168,7 @@ public class VisibilityManager : MonoBehaviour
         _visibilityMaskShader.SetFloat(ViewAngleID, viewAngle);
         _visibilityMaskShader.SetInt(NumRaysPerDegreeID, numRaysPerDegree);
         _visibilityMaskShader.SetFloat(MinAlphaID, _minAlpha);
-        _visibilityMaskShader.SetFloat(HighlightRadiusID, highlightRadius);
+        _visibilityMaskShader.SetFloat(HighlightAngleID, highlightAngle);
         _visibilityMaskShader.SetMatrix(InvOrthoMatrixID, orthoViewProjectionMatrix.inverse);
         _visibilityMaskShader.SetVector(CameraPositionID, _mainCamera.transform.position);
         _visibilityMaskShader.SetVector(HighlightCenterID, highlightCenter);

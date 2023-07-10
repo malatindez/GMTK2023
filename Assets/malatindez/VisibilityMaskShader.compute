@@ -18,7 +18,7 @@ int VisibilityMaskWidth;
 int VisibilityMaskHeight;
 float MinAlpha;
 
-float HighlightRadius;
+float HighlightAngle;
 float4x4 InvOrthoMatrix;
 float3 CameraPosition;
 float3 HighlightCenter;
@@ -38,7 +38,7 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     uv = uv * 2.0f - 1.0f;
     float4 worldPos = mul(InvOrthoMatrix, float4(uv, DepthMap[id.xy], 1.0f));
     worldPos /= worldPos.w;
-    if (dot(normalize(worldPos.xyz - CameraPosition), normalize(HighlightCenter - CameraPosition)) > HighlightRadius)
+    if (dot(normalize(worldPos.xyz - CameraPosition), normalize(HighlightCenter - CameraPosition)) > HighlightAngle)
     {
         Result[id.xy] = 1;
         return;
