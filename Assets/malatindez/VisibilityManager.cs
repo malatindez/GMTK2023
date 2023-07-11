@@ -175,7 +175,7 @@ public class VisibilityManager : MonoBehaviour
         _visibilityMaskShader.SetMatrix(InvOrthoMatrixID, orthoViewProjectionMatrix.inverse);
         _visibilityMaskShader.SetVector(CameraPositionID, _mainCamera.transform.position);
         _visibilityMaskShader.SetVector(HighlightCenterID, highlightCenter);
-        _visibilityMaskShader.SetFloat(RayOriginHeightID, worldRayOrigin.y);
+        _visibilityMaskShader.SetFloat(RayOriginHeightID, height);
         _visibilityMaskShader.SetInt(MaximumVisibleDistancePixelsID, maximumAmountOfStepsPerRay);
         _visibilityMaskShader.Dispatch(0, VisibilityMask.width / 8, VisibilityMask.height / 8, 1);
     }
