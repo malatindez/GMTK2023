@@ -293,7 +293,6 @@ public class VisibilityManager : MonoBehaviour
 
     private void FixedUpdate()
     {
-        ClearMasks();
     }
     private void LateUpdate()
     {
@@ -346,7 +345,7 @@ public class VisibilityManager : MonoBehaviour
         _clearShaderR8G8B8A8Conditional.SetVector(ClearColorID, new Vector4(0.0f,0.0f,0.0f,1.0f));
         _clearShaderR8G8B8A8Conditional.SetInt("ClearFlags", 0x1 | 0x2 | 0x4 | 0x8);
         ClearMasks();
-        _clearShaderR8G8B8A8Conditional.SetInt("ClearFlags", 0x1 | 0x2 | 0x4 | 0x8);
+        _clearShaderR8G8B8A8Conditional.SetInt("ClearFlags", 0x2 | 0x4 | 0x8);
         _clearShaderR8G8B8A8Conditional.SetInt("Width", MainViewMask.width);
         _clearShaderR8G8B8A8Conditional.SetInt("Height", MainViewMask.height);
 

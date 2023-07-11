@@ -85,7 +85,7 @@ Shader "Unlit/MainCameraRenderer" // DO NOT CHANGE. Main camera renderer feature
                 orthoUV = (orthoUV + 1) * 0.5;
                 float4 mask = UNITY_SAMPLE_TEX2D(_MainViewMask, orthoUV);
                 float fog = mask.r;
-                float vis = max(mask.g, mask.b);
+                float vis = mask.b > 0 ? mask.b : mask.g;
                 if(vis >= 0.99f)
                 {
                     return col2;

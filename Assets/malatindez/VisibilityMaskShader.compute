@@ -32,38 +32,37 @@ float2x2 rotate(float angle)
         cos(angle), -sin(angle),
         sin(angle), cos(angle));
 }
-[numthreads(8, 8, 1)]
-void CSMain(uint3 id : SV_DispatchThreadID)
+
+void ProcessRay(uint3 id, inout float4 maskValue, float depth)
 {
-    float fogOfWarValue = MainViewMask[id.xy].r;
-    
-    float2 toPixel = (int2) id.xy - RayOriginPixels;
-    float distance = length(toPixel.xy);
     float2 uv = float2(id.xy) / int2(VisibilityMaskWidth, VisibilityMaskHeight);
     uv = uv * 2.0f - 1.0f;
     float4 worldPos = mul(InvOrthoMatrix, float4(uv, DepthMap[id.xy], 1.0f));
     worldPos /= worldPos.w;
     
-    float HighlightValue = 0.0f;
-    if (RayOriginHeight > DepthMap[id.xy] && dot(normalize(worldPos.xyz - CameraPosition), normalize(HighlightCenter - CameraPosition)) > HighlightAngle)
+    float2 toPixel = (int2) id.xy - RayOriginPixels;
+    float distance = length(toPixel.xy);
+    
+    uint numRays = ceil(ViewAngle * NumRaysPerDegree);
+    
+    if (RayOriginHeight > depth)
     {
-        HighlightValue = 1.0f;
+        float t = dot(normalize(worldPos.xyz - CameraPosition), normalize(HighlightCenter - CameraPosition));
+        if (t > HighlightAngle)
+        {
+            maskValue.z = 1 - (t - HighlightAngle) / HighlightAngle;
+        }
+
     }
     
     
     float halfViewAngle = radians(ViewAngle / 2.0f);
-    uint numRays = ceil(ViewAngle * NumRaysPerDegree);
     float angleStep = radians(ViewAngle) / (float) (numRays - 1);
     
     float2 normalizedToPixel = normalize(toPixel.xy);
     
     if (acos(dot(normalizedToPixel, RayDirection)) > halfViewAngle)
     {
-        fogOfWarValue = max(min(fogOfWarValue, 0.1f), fogOfWarValue - 0.001f);
-        MainViewMask[id.xy] = float4(fogOfWarValue, 0.0f, HighlightValue, MainViewMask[id.xy].w);
-#ifdef DEBUG_SHADER
-        MainViewMask[id.xy] = float4(fogOfWarValue, DepthMap[id.xy], HighlightValue , MainViewMask[id.xy].w);
-#endif
         return;
     }
     float2 normalizedRayDirection = mul(rotate(-halfViewAngle), RayDirection);
@@ -75,11 +74,6 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     uint rayId = uint(round(angle / angleStep));
     if (rayId > numRays - 1)
     {
-        fogOfWarValue = max(min(fogOfWarValue, 0.1f), fogOfWarValue - 0.001f);
-        MainViewMask[id.xy] = float4(fogOfWarValue, 0.0f, HighlightValue, MainViewMask[id.xy].w);
-#ifdef DEBUG_SHADER
-        MainViewMask[id.xy] = float4(fogOfWarValue, DepthMap[id.xy], HighlightValue , MainViewMask[id.xy].w);
-#endif
         return;
     }
     uint2 rayTextureCoord = uint2(rayId % (uint) RayTextureSize, rayId / (uint) RayTextureSize);
@@ -87,32 +81,36 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     
     if (distance > furthestVisibleDistance)
     {
-        fogOfWarValue = max(min(fogOfWarValue, 0.1f), fogOfWarValue - 0.001f);
-        MainViewMask[id.xy] = float4(fogOfWarValue, 0.0f, HighlightValue, MainViewMask[id.xy].w);
-#ifdef DEBUG_SHADER
-        MainViewMask[id.xy] = float4(fogOfWarValue, DepthMap[id.xy], HighlightValue , MainViewMask[id.xy].w);
-#endif
         return;
     }
-    float alpha = lerp(0.0f, 1.0f,
+    maskValue.y = lerp(0.1f, 1.0f,
         (
             dot(normalizedToPixel, RayDirection) - cos(halfViewAngle)
         ) / ( // -------------------------------
                     1.0f - cos(halfViewAngle)
         ) / MaximumVisibleDistancePixels * (MaximumVisibleDistancePixels - distance)
     );
-    if (fogOfWarValue < 1.0f)
+    if (maskValue.x < 1.0f)
     {
-        fogOfWarValue += alpha / 32;
-        if (fogOfWarValue > 1.0)
+        maskValue.x += maskValue.y / 32;
+        if (maskValue.x > 1.0)
         {
-            fogOfWarValue = 1.0;
+            maskValue.x = 1.0;
         }
-        
+        return;
     }
-    else
+}
+
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    float4 maskValue = MainViewMask[id.xy].r;
+    float depth = DepthMap[id.xy];
+    maskValue.yzw = 0.0f;
+    ProcessRay(id, maskValue, depth);
+    if (!(maskValue.y > 0 || maskValue.z > 0))
     {
-        fogOfWarValue = max(min(fogOfWarValue, 0.1f), fogOfWarValue - 0.001f);
+        maskValue.x = max(min(maskValue.x, 0.1f), maskValue.x - 0.005f);
     }
-    MainViewMask[id.xy] = float4(fogOfWarValue, alpha, HighlightValue , MainViewMask[id.xy].w);
+    MainViewMask[id.xy] = maskValue;
 }
