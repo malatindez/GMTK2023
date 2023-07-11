@@ -4,18 +4,19 @@ RWTexture2D<float4> Result;
 float4 ClearColor;
 uint Width;
 uint Height;
-bool R;
-bool G;
-bool B;
-bool A;
-
+uint ClearFlags;
 
 [numthreads(16, 16, 1)]
 void clearShaderR8G8B8A8(uint3 id : SV_DispatchThreadID)
 {
+    bool R = ClearFlags = ClearFlags & 0x1;
+    bool G = ClearFlags = ClearFlags & 0x2;
+    bool B = ClearFlags = ClearFlags & 0x4;
+    bool A = ClearFlags = ClearFlags & 0x8;
     if (id.x < Width && id.y < Height)
     {
-        Result[id.xy] = float4(R ? ClearColor.r : Result[id.xy].r,
+        Result[id.xy] = float4(
+        R ? ClearColor.r : Result[id.xy].r,
         G ? ClearColor.g : Result[id.xy].g,
         B ? ClearColor.b : Result[id.xy].b,
         A ? ClearColor.a : Result[id.xy].a);

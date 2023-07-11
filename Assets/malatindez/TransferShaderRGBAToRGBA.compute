@@ -1,0 +1,16 @@
+#pragma kernel Transfer
+ 
+RWTexture2D<float4> Input;
+RWStructuredBuffer<float4> Result;
+int Width;
+
+[numthreads(8, 8, 1)]
+void Transfer(uint3 id : SV_DispatchThreadID)
+{
+    Result[id.x + id.y * Width] = float4(
+    Input[id.xy].r,
+    Input[id.xy].g,
+    Input[id.xy].b,
+    1.0f
+);
+}

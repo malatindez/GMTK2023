@@ -114,5 +114,5 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     {
         fogOfWarValue = max(min(fogOfWarValue, 0.1f), fogOfWarValue - 0.001f);
     }
-    MainViewMask[id.xy] = float4(fogOfWarValue, alpha, HighlightValue, MainViewMask[id.xy].w);
+    MainViewMask[id.xy] = float4(fogOfWarValue, alpha, HighlightValue , MainViewMask[id.xy].w);
 }
