@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-[ExecuteInEditMode]
 public class VisibilityCone : MonoBehaviour
 {
     #region Fields
@@ -13,14 +12,14 @@ public class VisibilityCone : MonoBehaviour
     public bool enableDebugRays = true;
     public bool enableDebugRaysInGame = true;
     public float highlightRadius = 1.0f;
-
+    private bool firstFrameSkipped = false;
     #endregion Fields
 
     #region Methods
 
     private void Start()
     {
-        _ = StartCoroutine(SkipFirst());
+        
     }
 
     private void drawDebugRays()
@@ -33,15 +32,14 @@ public class VisibilityCone : MonoBehaviour
         }
     }
 
-    private IEnumerator SkipFirst()
+    private void Update()
     {
-        yield return null; // skip first update
-
-        while (true)
-        {
-            if (Application.isPlaying)
+#if UNITY_EDITOR
+        if (Application.isPlaying)
             {
-                visibilityManager.UpdateVisibilityMask(
+#endif
+            if (!firstFrameSkipped) { firstFrameSkipped = true; return; }
+            visibilityManager.UpdateVisibilityMask(
                     transform.forward,
                     transform.position,
                     HighlightCenter.transform.position,
@@ -51,7 +49,8 @@ public class VisibilityCone : MonoBehaviour
                     maximumAmountOfStepsPerRay,
                     highlightRadius);
 
-                if (enableDebugRaysInGame)
+#if UNITY_EDITOR
+            if (enableDebugRaysInGame)
                 {
                     drawDebugRays();
                 }
@@ -60,9 +59,7 @@ public class VisibilityCone : MonoBehaviour
             {
                 drawDebugRays();
             }
-
-            yield return null;
-        }
+#endif
     }
 
     #endregion Methods
