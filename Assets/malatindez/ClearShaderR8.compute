@@ -2,8 +2,8 @@
 
 RWTexture2D<uint> Result;
 int ClearColor;
-int Width;
-int Height;
+uint Width;
+uint Height;
 
 
 [numthreads(16, 16, 1)]
