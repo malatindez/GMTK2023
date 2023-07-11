@@ -60,6 +60,8 @@ public class VisibilityManager : MonoBehaviour
     private static readonly int InvOrthoMatrixID = Shader.PropertyToID("InvOrthoMatrix");
     private static readonly int CameraPositionID = Shader.PropertyToID("CameraPosition");
     private static readonly int HighlightCenterID = Shader.PropertyToID("HighlightCenter");
+    private static readonly int MaximumVisibleDistancePixelsID = Shader.PropertyToID("MaximumVisibleDistancePixels");
+    private static readonly int RayOriginHeightID = Shader.PropertyToID("RayOriginHeight");
 
     public void UpdateVisibilityMask(
         Vector3 worldRayDirection,
@@ -126,6 +128,7 @@ public class VisibilityManager : MonoBehaviour
             (worldRayOrigin - _mainCamera.transform.position).normalized,
             (worldRayOrigin + _mainCamera.transform.up * highlightRadius - _mainCamera.transform.position).normalized
         );
+        
 
 #if UNITY_EDITOR
         _visibilityConeShader.SetTexture(0, FurthestVisibleDistancesID, _furthestVisibleDistances);
@@ -172,6 +175,8 @@ public class VisibilityManager : MonoBehaviour
         _visibilityMaskShader.SetMatrix(InvOrthoMatrixID, orthoViewProjectionMatrix.inverse);
         _visibilityMaskShader.SetVector(CameraPositionID, _mainCamera.transform.position);
         _visibilityMaskShader.SetVector(HighlightCenterID, highlightCenter);
+        _visibilityMaskShader.SetFloat(RayOriginHeightID, worldRayOrigin.y);
+        _visibilityMaskShader.SetInt(MaximumVisibleDistancePixelsID, maximumAmountOfStepsPerRay);
         _visibilityMaskShader.Dispatch(0, VisibilityMask.width / 8, VisibilityMask.height / 8, 1);
     }
     public RenderTexture VisibilityMask { get; private set; }

@@ -18,10 +18,13 @@ int VisibilityMaskWidth;
 int VisibilityMaskHeight;
 float MinAlpha;
 
+float RayOriginHeight;
 float HighlightAngle;
 float4x4 InvOrthoMatrix;
 float3 CameraPosition;
 float3 HighlightCenter;
+
+int MaximumVisibleDistancePixels;
 
 float2x2 rotate(float angle)
 {
@@ -40,7 +43,9 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     worldPos /= worldPos.w;
     if (dot(normalize(worldPos.xyz - CameraPosition), normalize(HighlightCenter - CameraPosition)) > HighlightAngle)
     {
-        Result[id.xy] = 1;
+        // TODO
+         // RayOriginHeight < worldPos.y 
+        Result[id.xy] = 1.0f;
         return;
     }
     
@@ -90,6 +95,6 @@ void CSMain(uint3 id : SV_DispatchThreadID)
             dot(normalizedToPixel, RayDirection) - cos(halfViewAngle)
         ) / ( // -------------------------------
                     1.0f - cos(halfViewAngle)
-        )
+        ) / MaximumVisibleDistancePixels * (MaximumVisibleDistancePixels - distance)
     );
 }
