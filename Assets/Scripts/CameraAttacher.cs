@@ -33,17 +33,22 @@ public class CameraAttacher : MonoBehaviour
         // Check for mouse input to update zoom and rotation.
         if (Input.mouseScrollDelta.y != 0)
         {
-            _zoom += Input.mouseScrollDelta.y * _zoomSensitivity;
+            _zoom -= Input.mouseScrollDelta.y * _zoomSensitivity;
             _zoom = Mathf.Clamp(_zoom, _minimumZoom, _maximumZoom);
         }
         if (Input.GetMouseButton(1))
         {
-            _yaw += Input.GetAxis("Mouse X") * _yawSensitivity;
-         }
-        if(Input.GetMouseButton(2))
-        {
-            _pitch += Input.GetAxis("Mouse Y") * _pitchSensitivity;
-            _pitch = Mathf.Clamp(_pitch, _minimumPitch, _maximumPitch);
+            float x = Input.GetAxis("Mouse X");
+            float y = Input.GetAxis("Mouse Y");
+            if (Mathf.Abs(x) * 16 / 9 < Mathf.Abs(y))
+            {
+                _pitch -= Input.GetAxis("Mouse Y") * _pitchSensitivity;
+                _pitch = Mathf.Clamp(_pitch, _minimumPitch, _maximumPitch);
+            }
+            else
+            {
+                _yaw += Input.GetAxis("Mouse X") * _yawSensitivity;
+            }
         }
 
         // Update position and rotation.
@@ -66,3 +71,4 @@ public class CameraAttacher : MonoBehaviour
         _target = target;
     }
 }
+
