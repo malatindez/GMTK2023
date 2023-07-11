@@ -119,7 +119,7 @@ public class VisibilityManager : MonoBehaviour
         // we need to decrease amount of rays because it wouldn't make sense to have more steps than amount of we can see
 
         int diagonalPixelAmount = (int)new Vector2(_mapDepthTexture.width, _mapDepthTexture.height).magnitude;
-        maximumAmountOfStepsPerRay = Math.Min(maximumAmountOfStepsPerRay, (int)(worldViewDistance * pixelStep * diagonalPixelAmount));
+//        maximumAmountOfStepsPerRay = Math.Min(maximumAmountOfStepsPerRay, (int)(worldViewDistance * pixelStep * diagonalPixelAmount));
 
         float halfViewAngle = Mathf.Deg2Rad * viewAngle / 2;
         float angleStep = (Mathf.Deg2Rad * viewAngle) / Mathf.Ceil(viewAngle * numRaysPerDegree);

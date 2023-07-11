@@ -45,7 +45,7 @@ void VisibilityCone (uint3 id : SV_DispatchThreadID)
             break;
         }
         // Sample the depth map
-        float depth = MapDepthTexture[int2(texPosPixels)].r;
+        float depth = MapDepthTexture[int2(round(texPosPixels))].r;
         // If we hit something, break out of the loop
         if (Height < depth)
         {

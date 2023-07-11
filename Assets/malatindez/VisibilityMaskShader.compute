@@ -68,7 +68,7 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     float dotProduct = dot(normalizedToPixel, normalizedRayDirection);
     float angle = acos(dotProduct);
     
-    uint rayId = uint(angle / angleStep);
+    uint rayId = uint(round(angle / angleStep));
     if (rayId > numRays - 1)
     {
         Result[id.xy] = 0;
