@@ -28,12 +28,13 @@ public class MainCameraRenderer : ScriptableRendererFeature
 
         public CustomRenderPass()
         {
-            material = new Material(Shader.Find("Unlit/MainCameraRenderer"));
-            if (material == null)
+            var t = Shader.Find("Unlit/MainCameraRenderer");
+            if (t == null)
             {
-                Debug.LogErrorFormat("Missing Material. Main Camera render pass will not execute. Check for missing reference in the renderer resources.");
+                Debug.LogErrorFormat("Missing shader. Main Camera render pass will not execute. Check for missing reference in the renderer resources.");
                 return;
             }
+            material = new Material(t);
         }
 
         public override void Configure(CommandBuffer cmd, RenderTextureDescriptor cameraTextureDescriptor)
@@ -44,6 +45,10 @@ public class MainCameraRenderer : ScriptableRendererFeature
 
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
+            if(material == null)
+            {
+                return;
+            }
             CommandBuffer cmd = CommandBufferPool.Get("VisibilityPass");
 
             RenderTargetIdentifier source = renderingData.cameraData.renderer.cameraColorTarget;
