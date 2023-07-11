@@ -43,10 +43,11 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     uv = uv * 2.0f - 1.0f;
     float4 worldPos = mul(InvOrthoMatrix, float4(uv, DepthMap[id.xy], 1.0f));
     worldPos /= worldPos.w;
+    
+    float HighlightValue = 0.0f;
     if (RayOriginHeight > DepthMap[id.xy] && dot(normalize(worldPos.xyz - CameraPosition), normalize(HighlightCenter - CameraPosition)) > HighlightAngle)
     {
-        MainViewMask[id.xy] = float4(fogOfWarValue, MainViewMask[id.xy].y ,1.0f, MainViewMask[id.xy].w);
-        return;
+        HighlightValue = 1.0f;
     }
     
     
@@ -59,9 +60,9 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     if (acos(dot(normalizedToPixel, RayDirection)) > halfViewAngle)
     {
         fogOfWarValue = max(min(fogOfWarValue, 0.1f), fogOfWarValue - 0.001f);
-        MainViewMask[id.xy] = float4(fogOfWarValue, 0.0f, 0, MainViewMask[id.xy].w);
+        MainViewMask[id.xy] = float4(fogOfWarValue, 0.0f, HighlightValue, MainViewMask[id.xy].w);
 #ifdef DEBUG_SHADER
-        MainViewMask[id.xy] = float4(fogOfWarValue, DepthMap[id.xy], 0, MainViewMask[id.xy].w);
+        MainViewMask[id.xy] = float4(fogOfWarValue, DepthMap[id.xy], HighlightValue , MainViewMask[id.xy].w);
 #endif
         return;
     }
@@ -75,9 +76,9 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     if (rayId > numRays - 1)
     {
         fogOfWarValue = max(min(fogOfWarValue, 0.1f), fogOfWarValue - 0.001f);
-        MainViewMask[id.xy] = float4(fogOfWarValue, 0.0f, 0, MainViewMask[id.xy].w);
+        MainViewMask[id.xy] = float4(fogOfWarValue, 0.0f, HighlightValue, MainViewMask[id.xy].w);
 #ifdef DEBUG_SHADER
-        MainViewMask[id.xy] = float4(fogOfWarValue, DepthMap[id.xy], 0, MainViewMask[id.xy].w);
+        MainViewMask[id.xy] = float4(fogOfWarValue, DepthMap[id.xy], HighlightValue , MainViewMask[id.xy].w);
 #endif
         return;
     }
@@ -87,9 +88,9 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     if (distance > furthestVisibleDistance)
     {
         fogOfWarValue = max(min(fogOfWarValue, 0.1f), fogOfWarValue - 0.001f);
-        MainViewMask[id.xy] = float4(fogOfWarValue, 0.0f, 0, MainViewMask[id.xy].w);
+        MainViewMask[id.xy] = float4(fogOfWarValue, 0.0f, HighlightValue, MainViewMask[id.xy].w);
 #ifdef DEBUG_SHADER
-        MainViewMask[id.xy] = float4(fogOfWarValue, DepthMap[id.xy], 0, MainViewMask[id.xy].w);
+        MainViewMask[id.xy] = float4(fogOfWarValue, DepthMap[id.xy], HighlightValue , MainViewMask[id.xy].w);
 #endif
         return;
     }
@@ -113,5 +114,5 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     {
         fogOfWarValue = max(min(fogOfWarValue, 0.1f), fogOfWarValue - 0.001f);
     }
-    MainViewMask[id.xy] = float4(fogOfWarValue, alpha, 0, MainViewMask[id.xy].w);
+    MainViewMask[id.xy] = float4(fogOfWarValue, alpha, HighlightValue, MainViewMask[id.xy].w);
 }
