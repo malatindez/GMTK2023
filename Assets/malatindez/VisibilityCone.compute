@@ -16,7 +16,7 @@ float HeightDecrease;
 int NumSteps;
 int RayTextureSize;
 
-#define ADDITIONAL_PIXELS 10
+#define ADDITIONAL_PIXELS 20
 float2x2 rotate(float angle)
 {
     return float2x2(

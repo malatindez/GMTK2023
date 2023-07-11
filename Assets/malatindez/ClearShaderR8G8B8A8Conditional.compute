@@ -1,0 +1,23 @@
+#pragma kernel clearShaderR8G8B8A8
+
+RWTexture2D<float4> Result;
+float4 ClearColor;
+uint Width;
+uint Height;
+bool R;
+bool G;
+bool B;
+bool A;
+
+
+[numthreads(16, 16, 1)]
+void clearShaderR8G8B8A8(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x < Width && id.y < Height)
+    {
+        Result[id.xy] = float4(R ? ClearColor.r : Result[id.xy].r,
+        G ? ClearColor.g : Result[id.xy].g,
+        B ? ClearColor.b : Result[id.xy].b,
+        A ? ClearColor.a : Result[id.xy].a);
+    }
+}

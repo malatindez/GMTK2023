@@ -6,7 +6,7 @@
 
 RWTexture2D<float> FurthestVisibleDistances;
 Texture2D<float> DepthMap;
-RWTexture2D<float> Result;
+RWTexture2D<float4> MainViewMask;
 
 int2 RayOriginPixels;
 float2 RayDirection;
@@ -35,6 +35,8 @@ float2x2 rotate(float angle)
 [numthreads(8, 8, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
 {
+    float fogOfWarValue = MainViewMask[id.xy].r;
+    
     float2 toPixel = (int2) id.xy - RayOriginPixels;
     float distance = length(toPixel.xy);
     float2 uv = float2(id.xy) / int2(VisibilityMaskWidth, VisibilityMaskHeight);
@@ -43,7 +45,7 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     worldPos /= worldPos.w;
     if (RayOriginHeight > DepthMap[id.xy] && dot(normalize(worldPos.xyz - CameraPosition), normalize(HighlightCenter - CameraPosition)) > HighlightAngle)
     {
-        Result[id.xy] = 1.0f;
+        MainViewMask[id.xy] = float4(fogOfWarValue, MainViewMask[id.xy].y ,1.0f, MainViewMask[id.xy].w);
         return;
     }
     
@@ -56,9 +58,10 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     
     if (acos(dot(normalizedToPixel, RayDirection)) > halfViewAngle)
     {
-        Result[id.xy] = 0;
+        fogOfWarValue = max(min(fogOfWarValue, 0.1f), fogOfWarValue - 0.001f);
+        MainViewMask[id.xy] = float4(fogOfWarValue, 0.0f, 0, MainViewMask[id.xy].w);
 #ifdef DEBUG_SHADER
-        Result[id.xy] = DepthMap[id.xy];
+        MainViewMask[id.xy] = float4(fogOfWarValue, DepthMap[id.xy], 0, MainViewMask[id.xy].w);
 #endif
         return;
     }
@@ -71,9 +74,10 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     uint rayId = uint(round(angle / angleStep));
     if (rayId > numRays - 1)
     {
-        Result[id.xy] = 0;
+        fogOfWarValue = max(min(fogOfWarValue, 0.1f), fogOfWarValue - 0.001f);
+        MainViewMask[id.xy] = float4(fogOfWarValue, 0.0f, 0, MainViewMask[id.xy].w);
 #ifdef DEBUG_SHADER
-        Result[id.xy] = DepthMap[id.xy];
+        MainViewMask[id.xy] = float4(fogOfWarValue, DepthMap[id.xy], 0, MainViewMask[id.xy].w);
 #endif
         return;
     }
@@ -82,17 +86,32 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     
     if (distance > furthestVisibleDistance)
     {
-        Result[id.xy] = 0;
+        fogOfWarValue = max(min(fogOfWarValue, 0.1f), fogOfWarValue - 0.001f);
+        MainViewMask[id.xy] = float4(fogOfWarValue, 0.0f, 0, MainViewMask[id.xy].w);
 #ifdef DEBUG_SHADER
-        Result[id.xy] = DepthMap[id.xy];
+        MainViewMask[id.xy] = float4(fogOfWarValue, DepthMap[id.xy], 0, MainViewMask[id.xy].w);
 #endif
         return;
     }
-    Result[id.xy] = lerp(0.0f, 1.0f,
+    float alpha = lerp(0.0f, 1.0f,
         (
             dot(normalizedToPixel, RayDirection) - cos(halfViewAngle)
         ) / ( // -------------------------------
                     1.0f - cos(halfViewAngle)
         ) / MaximumVisibleDistancePixels * (MaximumVisibleDistancePixels - distance)
     );
+    if (fogOfWarValue < 1.0f)
+    {
+        fogOfWarValue += alpha / 32;
+        if (fogOfWarValue > 1.0)
+        {
+            fogOfWarValue = 1.0;
+        }
+        
+    }
+    else
+    {
+        fogOfWarValue = max(min(fogOfWarValue, 0.1f), fogOfWarValue - 0.001f);
+    }
+    MainViewMask[id.xy] = float4(fogOfWarValue, alpha, 0, MainViewMask[id.xy].w);
 }

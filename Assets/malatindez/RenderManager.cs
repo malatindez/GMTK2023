@@ -78,8 +78,7 @@ public class RenderManager : MonoBehaviour
         MainCameraRenderer.environmentTexture = _environmentRenderTexture;
         MainCameraRenderer.environmentDepthTexture = _environmentRenderDepthTexture;
         MainCameraRenderer.worldTexture = _mainRenderTexture;
-        MainCameraRenderer.visibilityFogOfWarTexture = _visibilityManager.FogOfWarMask;
-        MainCameraRenderer.visibilityTexture = _visibilityManager.VisibilityMask;
+        MainCameraRenderer.mainViewMaskTexture = _visibilityManager.MainViewMask;
 
         Matrix4x4 viewMatrix = _environmentDepthRenderer.worldToCameraMatrix;
 

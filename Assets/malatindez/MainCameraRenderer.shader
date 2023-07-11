@@ -6,8 +6,7 @@ Shader "Unlit/MainCameraRenderer" // DO NOT CHANGE. Main camera renderer feature
         _EnvironmentTex ("Texture", 2D) = "white" {}
         _EnvironmentDepthTex ("Texture", 2D) = "white" {}
         _WorldTex ("Texture", 2D) = "white" {}
-        _VisibilityFogOfWarTex ("Fog of War Texture", 2D) = "white" {}
-        _VisibilityTex ("Visibility Texture", 2D) = "white" {}         
+        _MainViewMask ("Main View Mask", 2D) = "white" {}
     }
     SubShader
     {
@@ -27,8 +26,7 @@ Shader "Unlit/MainCameraRenderer" // DO NOT CHANGE. Main camera renderer feature
             UNITY_DECLARE_TEX2D(_EnvironmentTex);
             UNITY_DECLARE_TEX2D(_EnvironmentDepthTex);
             UNITY_DECLARE_TEX2D(_WorldTex);
-            UNITY_DECLARE_TEX2D(_VisibilityFogOfWarTex);
-            UNITY_DECLARE_TEX2D(_VisibilityTex);
+            UNITY_DECLARE_TEX2D(_MainViewMask);
 
             float4x4 _InvViewProj;
             float4x4 _OrthoViewProj;
@@ -85,9 +83,9 @@ Shader "Unlit/MainCameraRenderer" // DO NOT CHANGE. Main camera renderer feature
                 float4 orthoPos = mul(_OrthoViewProj, worldPos);
                 float2 orthoUV = orthoPos.xy / orthoPos.w;
                 orthoUV = (orthoUV + 1) * 0.5;
-//    return float4(orthoUV, 0, 0);
-                float fog = UNITY_SAMPLE_TEX2D(_VisibilityFogOfWarTex, orthoUV);
-                float vis = UNITY_SAMPLE_TEX2D(_VisibilityTex, orthoUV);
+                float4 mask = UNITY_SAMPLE_TEX2D(_MainViewMask, orthoUV);
+                float fog = mask.r;
+                float vis = max(mask.g, mask.b);
                 if(vis >= 0.99f)
                 {
                     return col2;

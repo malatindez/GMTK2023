@@ -8,8 +8,7 @@ public class MainCameraRenderer : ScriptableRendererFeature
     public static RenderTexture environmentTexture { get; set; }
     public static RenderTexture environmentDepthTexture { get; set; }
     public static RenderTexture worldTexture { get; set; }
-    public static RenderTexture visibilityFogOfWarTexture { get; set; }
-    public static RenderTexture visibilityTexture { get; set; }
+    public static RenderTexture mainViewMaskTexture { get; set; }
     public static Matrix4x4 InvPerspectiveViewProj { get; set; } = Matrix4x4.identity;
     public static Matrix4x4 OrthoViewProj { get; set; } = Matrix4x4.identity;
     
@@ -23,8 +22,7 @@ public class MainCameraRenderer : ScriptableRendererFeature
         private readonly int _EnvironmentTexID = Shader.PropertyToID("_EnvironmentTex");
         private readonly int _EnvironmentDepthTexID = Shader.PropertyToID("_EnvironmentDepthTex");
         private readonly int _WorldTexID = Shader.PropertyToID("_WorldTex");
-        private readonly int _VisibilityFogOfWarTexID = Shader.PropertyToID("_VisibilityFogOfWarTex");
-        private readonly int _VisibilityTexID = Shader.PropertyToID("_VisibilityTex");
+        private readonly int _MainViewMaskID = Shader.PropertyToID("_MainViewMask");
 
         public CustomRenderPass()
         {
@@ -60,8 +58,7 @@ public class MainCameraRenderer : ScriptableRendererFeature
             material.SetTexture(_EnvironmentTexID, environmentTexture);
             material.SetTexture(_EnvironmentDepthTexID, environmentDepthTexture);
             material.SetTexture(_WorldTexID, worldTexture);
-            material.SetTexture(_VisibilityFogOfWarTexID, visibilityFogOfWarTexture);
-            material.SetTexture(_VisibilityTexID, visibilityTexture);
+            material.SetTexture(_MainViewMaskID, mainViewMaskTexture);
 
             // Apply the shader pass
             cmd.Blit(source, tempTargetHandle.Identifier(), material);
