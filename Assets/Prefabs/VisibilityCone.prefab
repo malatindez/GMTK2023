@@ -45,9 +45,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   visibilityManager: {fileID: 0}
-  numRaysPerDegree: 30
-  numSteps: 1024
-  viewAngle: 90
+  HighlightCenter: {fileID: 0}
+  numRaysPerDegree: 60
+  maximumAmountOfStepsPerRay: 1024
+  viewAngle: 120
   viewDistance: 10
   enableDebugRays: 0
   enableDebugRaysInGame: 0
+  highlightRadius: 0.4

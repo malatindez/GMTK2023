@@ -24,7 +24,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1833372777826622380}
   m_LocalRotation: {x: 0.040724706, y: 0.000000029802319, z: 0.0000000018626449, w: 0.9991704}
-  m_LocalPosition: {x: 0, y: -1, z: 0}
+  m_LocalPosition: {x: 0, y: -0.8, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -488,7 +488,7 @@ PrefabInstance:
     - target: {fileID: 3140854854455795734, guid: e86eeef4d585e9844ab9f2e8f088706b,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.68
+      value: 0.4
       objectReference: {fileID: 0}
     - target: {fileID: 3140854854455795734, guid: e86eeef4d585e9844ab9f2e8f088706b,
         type: 3}
@@ -535,11 +535,6 @@ PrefabInstance:
       propertyPath: HighlightCenter
       value: 
       objectReference: {fileID: 1833372777826622380}
-    - target: {fileID: 9170126105175692954, guid: e86eeef4d585e9844ab9f2e8f088706b,
-        type: 3}
-      propertyPath: highlightRadius
-      value: 0.4
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
