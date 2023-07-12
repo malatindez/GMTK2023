@@ -17,7 +17,7 @@ MonoBehaviour:
   m_RendererType: 1
   m_RendererData: {fileID: 0}
   m_RendererDataList:
-  - {fileID: 11400000, guid: a6a862620959b17418178d98b3f93208, type: 2}
+  - {fileID: 11400000, guid: e806b60815f44c243a2e55d5944f45ba, type: 2}
   - {fileID: 11400000, guid: 35513b4d20f09214f8126b1d16d3e28c, type: 2}
   m_DefaultRendererIndex: 0
   m_RequireDepthTexture: 0
@@ -62,7 +62,7 @@ MonoBehaviour:
   m_AdditionalLightsCookieResolution: 512
   m_AdditionalLightsCookieFormat: 1
   m_UseSRPBatcher: 1
-  m_SupportsDynamicBatching: 0
+  m_SupportsDynamicBatching: 1
   m_MixedLightingSupported: 1
   m_SupportsLightCookies: 1
   m_SupportsLightLayers: 0
@@ -88,13 +88,13 @@ MonoBehaviour:
   m_PrefilteringModeAdditionalLightShadows: 0
   m_PrefilterXRKeywords: 1
   m_PrefilteringModeForwardPlus: 0
-  m_PrefilteringModeDeferredRendering: 0
+  m_PrefilteringModeDeferredRendering: 1
   m_PrefilteringModeScreenSpaceOcclusion: 1
   m_PrefilterDebugKeywords: 1
   m_PrefilterWriteRenderingLayers: 1
   m_PrefilterHDROutput: 1
-  m_PrefilterSSAODepthNormals: 1
-  m_PrefilterSSAOSourceDepthLow: 0
+  m_PrefilterSSAODepthNormals: 0
+  m_PrefilterSSAOSourceDepthLow: 1
   m_PrefilterSSAOSourceDepthMedium: 1
   m_PrefilterSSAOSourceDepthHigh: 1
   m_PrefilterSSAOInterleaved: 0

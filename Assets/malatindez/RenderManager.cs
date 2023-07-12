@@ -17,25 +17,40 @@ public class RenderManager : MonoBehaviour
     [SerializeField] private RenderTexture _environmentRenderDepthTexture;
     [SerializeField] private RenderTexture _mapDepthTexture;
     [SerializeField] private VisibilityManager _visibilityManager;
+    [SerializeField] private Vector2 ScreenDowngrade = new Vector2(8, 8);
     private Camera _displayCamera;
     // Start is called before the first frame update
     private void Start()
     {
         _displayCamera = GetComponent<Camera>();
     }
-    private static bool UpdateTextureIfResolutionChanged(RenderTexture texture)
+    private bool UpdateTextureIfResolutionChanged(RenderTexture texture)
     {
         if (texture.width != Screen.width || texture.height != Screen.height)
         {
             if (texture == null)
             {
-                texture = new RenderTexture(Screen.width, Screen.height, 24);
+                texture = new RenderTexture((int)(Screen.width / ScreenDowngrade.x), (int)(Screen.height / ScreenDowngrade.x), 24)
+                {
+                    depthStencilFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.R16_UNorm,
+                    graphicsFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.R16G16B16A16_SFloat,
+                    anisoLevel = 0,
+                    filterMode = FilterMode.Point,
+                    wrapMode = TextureWrapMode.Clamp,
+                    autoGenerateMips = false,
+                    useMipMap = false,
+                };
             }
             else
             {
                 texture.Release();
-                texture.width = Screen.width;
-                texture.height = Screen.height;
+                texture.width = (int)(Screen.width / ScreenDowngrade.x);
+                texture.height = (int)(Screen.height / ScreenDowngrade.y);
+                texture.anisoLevel = 0;
+                texture.filterMode = FilterMode.Point;
+                texture.autoGenerateMips = false;
+                texture.wrapMode = TextureWrapMode.Clamp;
+                texture.useMipMap = false;
             }
 
             _ = texture.Create();
@@ -44,25 +59,38 @@ public class RenderManager : MonoBehaviour
         return false;
     }
 
-    private static void UpdateTextureIfResolutionChanged(ref RenderTexture texture, Camera targetCamera)
+    private void UpdateTextureIfResolutionChanged(ref RenderTexture texture, Camera targetCamera)
     {
         if(UpdateTextureIfResolutionChanged(texture))
             targetCamera.targetTexture = texture;
     }
 
-    private static void UpdateDepthTextureIfResolutionChanged(ref RenderTexture texture, Camera targetCamera)
+    private void UpdateDepthTextureIfResolutionChanged(ref RenderTexture texture, Camera targetCamera)
     {
         if (texture.width != Screen.width || texture.height != Screen.height)
         {
             if (texture == null)
             {
-                texture = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.RFloat);
+                texture = new RenderTexture((int)(Screen.width / ScreenDowngrade.x), (int)(Screen.height / ScreenDowngrade.y), 0, RenderTextureFormat.RFloat)
+                {
+                    graphicsFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.R16G16B16A16_SFloat,
+                    anisoLevel = 0,
+                    filterMode = FilterMode.Point,
+                    wrapMode = TextureWrapMode.Clamp,
+                    autoGenerateMips = false,
+                    useMipMap = false,
+                };
             }
             else
             {
                 texture.Release();
-                texture.width = Screen.width;
-                texture.height = Screen.height;
+                texture.width = (int)(Screen.width / ScreenDowngrade.x);
+                texture.height = (int)(Screen.height / ScreenDowngrade.y);
+                texture.anisoLevel = 0;
+                texture.filterMode = FilterMode.Point;
+                texture.autoGenerateMips = false;
+                texture.wrapMode = TextureWrapMode.Clamp;
+                texture.useMipMap = false;
             }
             texture.Create();
             targetCamera.targetTexture = texture;

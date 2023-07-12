@@ -54,6 +54,28 @@ Shader "Unlit/MainCameraRenderer" // DO NOT CHANGE. Main camera renderer feature
                 o.clipPos = UnityObjectToClipPos(v.vertex);
                 o.uv = v.uv;
                 return o;
+}
+
+            static const float3x3 sobelX = float3x3(-1, 0, 1,
+                                  -2, 0, 2,
+                                  -1, 0, 1);
+
+            static const float3x3 sobelY = float3x3(-1, -2, -1,
+                                   0, 0, 0,
+                                   1, 2, 1);
+
+
+            float Convolve(float3x3 kernel, float3x3 image)
+            {
+                float result = 0;
+                for (int i = 0; i < 3; i++)
+                {
+                    for (int j = 0; j < 3; j++)
+                    {
+                        result += kernel[i][j] * image[i][j];
+                    }
+                }
+                return result;
             }
 
 
@@ -94,6 +116,11 @@ Shader "Unlit/MainCameraRenderer" // DO NOT CHANGE. Main camera renderer feature
                 {
                     return col2;
                 }
+                if(length(col2) > 1.2f)
+                {
+                    col2 *= 1;
+                }
+    
                 return col2 * vis * 0.5 + 
                     float4(float3(length(col.xyz) / 3, length(col.xyz) / 3, length(col.xyz) / 3) * fog, 1) * 0.3
                 + max(0.0f, fog - 0.1f) * col2 * 0.2 ;
