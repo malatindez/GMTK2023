@@ -59350,12 +59350,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01de2249d63c19b49b0691a581d85d9a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _maximumTimeAlive: 3
-  _initialIntensity: 5
-  _speed: 0.5
+  _maximumTimeAlive: 3000
+  _initialIntensity: 30000
+  _speed: 5
   _omnidirectional: 1
   _activateOnTimer: 1
-  _activationTime: 3
+  _activationTime: 0
   _enableDebugRays: 1
   _enableDebugRaysInGame: 1
 --- !u!1001 &1934863530
