@@ -17,7 +17,7 @@ int NumSteps;
 int RayTextureSize;
 int RayIdOffset;
 
-#define ADDITIONAL_PIXELS 20
+float AdditionalDepthPixels;
 float2x2 rotate(float angle)
 {
     return float2x2(
@@ -64,6 +64,6 @@ void VisibilityCone (uint3 id : SV_DispatchThreadID)
     {
         FurthestVisibleDistances[texCoord] = 0.0f;
     }
-    FurthestVisibleDistances[texCoord].r = (float) i + ADDITIONAL_PIXELS;
+    FurthestVisibleDistances[texCoord].r = (float) i + AdditionalDepthPixels;
 
 }

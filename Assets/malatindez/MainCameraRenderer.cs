@@ -29,7 +29,7 @@ public class MainCameraRenderer : ScriptableRendererFeature
             var t = Shader.Find("Unlit/MainCameraRenderer");
             if (t == null)
             {
-                Debug.LogErrorFormat("Missing shader. Main Camera render pass will not execute. Check for missing reference in the renderer resources.");
+                Debug.LogWarningFormat("Missing shader. Main Camera render pass will not execute. Check for missing reference in the renderer resources.");
                 return;
             }
             material = new Material(t);

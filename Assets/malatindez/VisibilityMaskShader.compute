@@ -29,19 +29,18 @@ struct EchoPoint
 
 
 
-RWTexture2D<float> FurthestVisibleDistances;
+RWTexture2D<float2> FurthestVisibleDistances;
 Texture2D<float> DepthMap;
 RWTexture2D<float4> MainViewMask;
+RWTexture2D<float2> EchoGrid;
 StructuredBuffer<RayDataStruct> RayData;
-
 
 int VisibilityMaskWidth;
 int VisibilityMaskHeight;
 int RayTextureSize;
 
-
-
 int RayAmount;
+int EchoAmount;
 
 float MinAlpha;
 float4x4 InvOrthoMatrix;
@@ -154,5 +153,6 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     {
         maskValue.x = max(min(maskValue.x, 0.1f), maskValue.x - 0.005f);
     }
+    maskValue.w = EchoGrid[id.xy].y;
     MainViewMask[id.xy] = maskValue;
 }

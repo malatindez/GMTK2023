@@ -14046,7 +14046,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1799557203254782, guid: 1009ea8ecb4cdd34c93752b56ffa4c50, type: 3}
       propertyPath: m_StaticEditorFlags
-      value: 2147483647
+      value: 127
       objectReference: {fileID: 0}
     - target: {fileID: 4176216229701232, guid: 1009ea8ecb4cdd34c93752b56ffa4c50, type: 3}
       propertyPath: m_RootOrder
@@ -38568,7 +38568,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5937776, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: 1.0740967, y: -0.000030517578}
+  m_AnchoredPosition: {x: 1.0741272, y: -0.000030517578}
   m_SizeDelta: {x: -2.2883, y: 9.1546}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1279164255
@@ -53739,7 +53739,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0.404, y: 0.5}
-  m_AnchoredPosition: {x: 1.3208008, y: -0.000030517578}
+  m_AnchoredPosition: {x: 1.3209839, y: -0.000030517578}
   m_SizeDelta: {x: 2.6422, y: 9.1546}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1773368907
@@ -59314,6 +59314,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1933820566}
+    - targetCorrespondingSourceObject: {fileID: 2236540162436045642, guid: 52bfedb0eb58cdf46a6c283e7060faf8,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1933820576}
   m_SourcePrefab: {fileID: 100100000, guid: 52bfedb0eb58cdf46a6c283e7060faf8, type: 3}
 --- !u!4 &1933820557 stripped
 Transform:
@@ -59334,6 +59338,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _accessLevel: 1
+--- !u!114 &1933820576
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 501443150}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01de2249d63c19b49b0691a581d85d9a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maximumTimeAlive: 3
+  _initialIntensity: 5
+  _speed: 0.5
+  _omnidirectional: 1
+  _activateOnTimer: 1
+  _activationTime: 3
+  _enableDebugRays: 1
+  _enableDebugRaysInGame: 1
 --- !u!1001 &1934863530
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -67241,21 +67265,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24f68f610c43fed4ca389e790923f495, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _clearShaderR8: {fileID: 7200000, guid: 6d76685a358ae6c448cc35ecb1db195a, type: 3}
-  _clearShaderR8G8B8A8: {fileID: 7200000, guid: 2215c34a17ae1e34fa93a5942c308c39,
+  _clearShaderR8G8B8A8Conditional: {fileID: 7200000, guid: 18eff46efc311d4479bb5dc6d87b43fb,
     type: 3}
-  _fogOfWarMaskShader: {fileID: 7200000, guid: fb4619575b6a3a04e83f1134d309a4a1, type: 3}
-  _mapCamera: {fileID: 1083827850085527736}
-  _mainCamera: {fileID: 8617605870100676168}
-  _mapDepthTexture: {fileID: 8400000, guid: 4d42ddf787773a34980404892f5d82a0, type: 2}
-  _maximumTotalAmountOfRays: 1048576
   _visibilityConeShader: {fileID: 7200000, guid: d53800d7f873bd24a99b8051b856e78a,
     type: 3}
   _visibilityMaskShader: {fileID: 7200000, guid: d14a3b7a73ca9314ea434c7ffdffd1ae,
     type: 3}
-  _R8ToR8G8B8A8TransferShader: {fileID: 7200000, guid: 7411a2935c82d324bafefc61bee3974d,
+  _RToRGBATransferShader: {fileID: 7200000, guid: 7411a2935c82d324bafefc61bee3974d,
     type: 3}
+  _RGBAToRGBATransferShader: {fileID: 7200000, guid: 2b0d233655a25824eb8eeb08ae4df716,
+    type: 3}
+  _mapDepthTexture: {fileID: 8400000, guid: 4d42ddf787773a34980404892f5d82a0, type: 2}
+  _mapCamera: {fileID: 1083827850085527736}
+  _mainCamera: {fileID: 8617605870100676168}
+  _maximumTotalAmountOfRays: 65536
   _minAlpha: 0.5
+  AdditionalDepthPixels: 17
+  _echoHeight: 2
+  _echoSpawner: {fileID: 7200000, guid: 3d413906cd4fe044f95bfb937514b2c4, type: 3}
+  _echoSimulator: {fileID: 7200000, guid: 6828d084421453848b54ea5a9943393f, type: 3}
   _debugRenderMasks: 1
 --- !u!1 &3745200539771320626
 GameObject:

@@ -1,11 +1,105 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 public class VisibilityManager : MonoBehaviour
 {
+    public static VisibilityManager Instance {get; private set;}
+    private struct RayData
+    {
+        // Ints are casted to floats to increase performance
+        Vector2Int rayOriginPixels;
+        Vector2 rayDirection;
+        float viewAngle;
+        int numRaysPerDegree;
+        float highlightAngle;
+        Vector3 highlightCenter;
+        float height;
+        int maximumAmountOfStepsPerRay;
+    };
+    private struct EchoSpawnPoint
+    {
+        float2 position;
+        float2 direction; // (0,0) for OmniDirectional
+        float intensity;
+        float maximumTimeAlive;
+        float speed;
+        float padding;
+    };
+    #region Fields
+    private static readonly int RayDataSize = 12;
+    private static readonly int EchoSpawnPointSize = 8;
+
+
+    private static readonly int FurthestVisibleDistancesID = Shader.PropertyToID("FurthestVisibleDistances");
+    private static readonly int MapDepthTextureID = Shader.PropertyToID("MapDepthTexture");
+    private static readonly int MapDepthTextureSizeID = Shader.PropertyToID("MapDepthTextureSize");
+    private static readonly int RayOriginPixelsID = Shader.PropertyToID("RayOriginPixels");
+    private static readonly int HeightDecreaseID = Shader.PropertyToID("HeightDecrease");
+    private static readonly int RayDirectionID = Shader.PropertyToID("RayDirection");
+    private static readonly int NumStepsID = Shader.PropertyToID("NumSteps");
+    private static readonly int RayTextureSizeID = Shader.PropertyToID("RayTextureSize");
+    private static readonly int DepthMapID = Shader.PropertyToID("DepthMap");
+    private static readonly int ResultID = Shader.PropertyToID("Result");
+    private static readonly int VisibilityMaskWidthID = Shader.PropertyToID("VisibilityMaskWidth");
+    private static readonly int VisibilityMaskHeightID = Shader.PropertyToID("VisibilityMaskHeight");
+    private static readonly int MinAlphaID = Shader.PropertyToID("MinAlpha");
+    private static readonly int WidthID = Shader.PropertyToID("Width");
+    private static readonly int HeightID = Shader.PropertyToID("Height");
+    private static readonly int ClearColorID = Shader.PropertyToID("ClearColor");
+    private static readonly int MainViewMaskID = Shader.PropertyToID("MainViewMask");
+    private static readonly int HalfViewAngleID = Shader.PropertyToID("HalfViewAngle");
+    private static readonly int AngleStepID = Shader.PropertyToID("AngleStep");
+    private static readonly int InvOrthoMatrixID = Shader.PropertyToID("InvOrthoMatrix");
+    private static readonly int CameraPositionID = Shader.PropertyToID("CameraPosition");
+    private static readonly int RayAmountID = Shader.PropertyToID("RayAmount");
+    private static readonly int RayDataID = Shader.PropertyToID("RayData");
+
+    // CHANGE THIS DATA IN SHADER AS WELL
+    public static readonly int MaximumRaysPerFrame = 32;
+
+    public static readonly int MaximumEchoSpawnersPerFrame = 1024;
+
+    [SerializeField] private ComputeShader _clearShaderR8G8B8A8Conditional;
+    [SerializeField] private ComputeShader _visibilityConeShader;
+    [SerializeField] private ComputeShader _visibilityMaskShader;
+    [SerializeField] private ComputeShader _RToRGBATransferShader;
+    [SerializeField] private ComputeShader _RGBAToRGBATransferShader;
+    [SerializeField] public RenderTexture _mapDepthTexture;
+    [SerializeField] private Camera _mapCamera = null;
+    [SerializeField] private Camera _mainCamera = null;
+    [SerializeField] private int _maximumTotalAmountOfRays = 1024 * 1024;
+    private int _rayTextureSize;
+    [SerializeField] private float _minAlpha = 0.5f;
+    [SerializeField] private float AdditionalDepthPixels = 20.0f;
+    [SerializeField] private float _echoHeight;
+    [SerializeField] private ComputeShader _echoSpawner;
+    [SerializeField] private ComputeShader _echoSimulator;
+    public float EchoHeight => _echoHeight;
+    private RenderTexture _furthestVisibleDistances;
+    private List<float> rayData = new List<float>();
+    private List<float> echoData = new List<float>();
+    int rayIdOffset = 0;
+
+    private ComputeBuffer _visibilityMaskRayData;
+
+    private ComputeBuffer _echoSpawnPoints;
+
+
+    private RenderTexture _echoGrid;
+    private RenderTexture _echoGridBackbuffer;
+    private RenderTexture _echoPositions;
+    private RenderTexture _echoPositionsBackbuffer;
+    bool _swapEchoGrids = false;
+
+    private int _maskHeight;
+    private int _maskWidth;
+
+    #endregion Fields
+
 
     // TODO:
     // Update the visibility cone so it depends on the point's height and
@@ -32,41 +126,38 @@ public class VisibilityManager : MonoBehaviour
     void Awake()
     {
     }
-
-    private static readonly int FurthestVisibleDistancesID = Shader.PropertyToID("FurthestVisibleDistances");
-    private static readonly int MapDepthTextureID = Shader.PropertyToID("MapDepthTexture");
-    private static readonly int MapDepthTextureSizeID = Shader.PropertyToID("MapDepthTextureSize");
-    private static readonly int RayOriginPixelsID = Shader.PropertyToID("RayOriginPixels");
-    private static readonly int HeightDecreaseID = Shader.PropertyToID("HeightDecrease");
-    private static readonly int RayDirectionID = Shader.PropertyToID("RayDirection");
-    private static readonly int ViewAngleID = Shader.PropertyToID("ViewAngle");
-    private static readonly int NumStepsID = Shader.PropertyToID("NumSteps");
-    private static readonly int NumRaysPerDegreeID = Shader.PropertyToID("NumRaysPerDegree");
-    private static readonly int RayTextureSizeID = Shader.PropertyToID("RayTextureSize");
-    private static readonly int DepthMapID = Shader.PropertyToID("DepthMap");
-    private static readonly int ResultID = Shader.PropertyToID("Result");
-    private static readonly int VisibilityMaskWidthID = Shader.PropertyToID("VisibilityMaskWidth");
-    private static readonly int VisibilityMaskHeightID = Shader.PropertyToID("VisibilityMaskHeight");
-    private static readonly int MinAlphaID = Shader.PropertyToID("MinAlpha");
-    private static readonly int WidthID = Shader.PropertyToID("Width");
-    private static readonly int HeightID = Shader.PropertyToID("Height");
-    private static readonly int ClearColorID = Shader.PropertyToID("ClearColor");
-    private static readonly int MainViewMaskID = Shader.PropertyToID("MainViewMask");
-    private static readonly int HalfViewAngleID = Shader.PropertyToID("HalfViewAngle");
-    private static readonly int AngleStepID = Shader.PropertyToID("AngleStep");
-    private static readonly int HighlightAngleID = Shader.PropertyToID("HighlightAngle");
-    private static readonly int InvOrthoMatrixID = Shader.PropertyToID("InvOrthoMatrix");
-    private static readonly int CameraPositionID = Shader.PropertyToID("CameraPosition");
-    private static readonly int HighlightCenterID = Shader.PropertyToID("HighlightCenter");
-    private static readonly int MaximumVisibleDistancePixelsID = Shader.PropertyToID("MaximumVisibleDistancePixels");
-    private static readonly int RayOriginHeightID = Shader.PropertyToID("RayOriginHeight");
-    private static readonly int RayAmountID = Shader.PropertyToID("RayAmount");
-    private static readonly int EchoAmountID = Shader.PropertyToID("EchoAmount");
-    private static readonly int RayDataID = Shader.PropertyToID("RayData");
-    private static readonly int EchoDataID = Shader.PropertyToID("EchoData");
-
-    // CHANGE THIS DATA IN SHADER AS WELL
-    public static readonly int MaximumRaysPerFrame = 32;
+    // direction should be normalized
+    public void AddEchoPoint(Vector3 worldPos, float maximumTimeAlive, float initialIntensity, float speed, Vector3 direction = default)
+    {
+        if(echoData.Count / EchoSpawnPointSize > MaximumEchoSpawnersPerFrame)
+        {
+#if UNITY_EDITOR
+            Debug.LogWarning("Invalid parameters for visibility mask calculation");
+#endif
+        }
+        Vector3 localPos = _mapCamera.WorldToViewportPoint(worldPos);
+        Vector2 originPixels = new Vector2((localPos.x * _mapDepthTexture.width), (int)(localPos.y * _mapDepthTexture.height));
+        Vector2 directionPixels;
+        float speedPixels = speed / (localPos - _mapCamera.WorldToViewportPoint(worldPos + Vector3.right)).magnitude;
+        if(direction == default(Vector3))
+        {
+            directionPixels = new Vector2(0, 0);
+        }
+        else // cast to the depth space
+        {
+            Vector3 localDirection = _mapCamera.WorldToViewportPoint(worldPos + direction) - localPos;
+            directionPixels = new Vector2(localDirection.x, localDirection.y);
+            directionPixels.Normalize();
+        }
+        echoData.Add(originPixels.x);
+        echoData.Add(originPixels.y);
+        echoData.Add(directionPixels.x);
+        echoData.Add(directionPixels.y);
+        echoData.Add(initialIntensity);
+        echoData.Add(maximumTimeAlive);
+        echoData.Add(speedPixels);
+        echoData.Add(0.0f);
+    }
 
     public void UpdateVisibilityMask(
         Vector3 worldRayDirection,
@@ -79,10 +170,17 @@ public class VisibilityManager : MonoBehaviour
         float highlightRadius
         )
     {
-        if (maximumAmountOfStepsPerRay <= 1 || numRaysPerDegree <= 0 || viewAngle < 0 || viewAngle * numRaysPerDegree >= _maximumTotalAmountOfRays)
+        if (maximumAmountOfStepsPerRay <= 1 || numRaysPerDegree <= 0 || viewAngle <= 1 || viewAngle * numRaysPerDegree >= _maximumTotalAmountOfRays)
         {
 #if UNITY_EDITOR
             Debug.LogWarning("Invalid parameters for visibility mask calculation");
+#endif
+            return;
+        }
+        if (rayData.Count / RayDataSize >= MaximumRaysPerFrame)
+        {
+#if UNITY_EDITOR
+            Debug.LogWarning("Maximum amount of rays per frame reached");
 #endif
             return;
         }
@@ -107,8 +205,6 @@ public class VisibilityManager : MonoBehaviour
                 unprojectedRayDirection.x,
                 unprojectedRayDirection.y
             );
-            unprojectedRayDirection.x = rayDirection.x;
-            unprojectedRayDirection.y = rayDirection.y;
             rayDirection.Normalize();
 
             Vector3 pixelStepSize = rayOrigin - _mapCamera.WorldToViewportPoint(worldRayOrigin + Vector3.right);
@@ -128,12 +224,12 @@ public class VisibilityManager : MonoBehaviour
 
         float halfViewAngle = Mathf.Deg2Rad * viewAngle / 2;
         float angleStep = (Mathf.Deg2Rad * viewAngle) / Mathf.Ceil(viewAngle * numRaysPerDegree);
-        
+
         float highlightAngle = Vector3.Dot(
             (worldRayOrigin - _mainCamera.transform.position).normalized,
             (worldRayOrigin + _mainCamera.transform.up * highlightRadius - _mainCamera.transform.position).normalized
         );
-        
+
 
 #if UNITY_EDITOR
 
@@ -142,7 +238,7 @@ public class VisibilityManager : MonoBehaviour
         _visibilityConeShader.SetInt(RayTextureSizeID, _rayTextureSize);
 
 #endif
-
+        _visibilityConeShader.SetFloat("AdditionalDepthPixels", AdditionalDepthPixels);
         int numRays = Mathf.CeilToInt(viewAngle * numRaysPerDegree);
         _visibilityConeShader.SetVector(MapDepthTextureSizeID, new Vector2(_mapDepthTexture.width, _mapDepthTexture.height));
         _visibilityConeShader.SetInts(RayOriginPixelsID, rayOriginPixels);
@@ -156,68 +252,29 @@ public class VisibilityManager : MonoBehaviour
 
         _visibilityConeShader.SetInt(NumStepsID, maximumAmountOfStepsPerRay);
         _visibilityConeShader.SetInt("RayIdOffset", rayIdOffset);
-        
+
         int threadGroups = Mathf.CeilToInt(numRays / 64.0f);
         _visibilityConeShader.Dispatch(0, threadGroups, 1, 1);
 
-        rayData.Add (rayOriginPixels[0]);
-        rayData.Add (rayOriginPixels[1]);
-        rayData.Add (rayDirection.x);
-        rayData.Add (rayDirection.y);
+        rayData.Add(rayOriginPixels[0]);
+        rayData.Add(rayOriginPixels[1]);
+        rayData.Add(rayDirection.x);
+        rayData.Add(rayDirection.y);
 
         rayData.Add(viewAngle);
         rayData.Add(maximumAmountOfStepsPerRay);
         rayData.Add(numRaysPerDegree);
-        rayData.Add(height); 
+        rayData.Add(height);
 
-        rayData.Add(highlightCenter.x); 
-        rayData.Add(highlightCenter.y); 
-        rayData.Add(highlightCenter.z); 
+        rayData.Add(highlightCenter.x);
+        rayData.Add(highlightCenter.y);
+        rayData.Add(highlightCenter.z);
         rayData.Add(highlightAngle);
         rayIdOffset += numRays;
     }
     public RenderTexture MainViewMask { get; private set; }
 
     #endregion Methods
-
-    #region Fields
-    [SerializeField] private ComputeShader _clearShaderR8G8B8A8Conditional;
-    [SerializeField] private ComputeShader _visibilityConeShader;
-    [SerializeField] private ComputeShader _visibilityMaskShader;
-    [SerializeField] private ComputeShader _RToRGBATransferShader;
-    [SerializeField] private ComputeShader _RGBAToRGBATransferShader;
-    [SerializeField] public RenderTexture _mapDepthTexture;
-    private RenderTexture _furthestVisibleDistances;
-
-    [SerializeField] private Camera _mapCamera = null;
-    [SerializeField] private Camera _mainCamera = null;
-
-    private int _maskHeight = 8192;
-    private int _maskWidth = 8192;
-
-    [SerializeField] private int _maximumTotalAmountOfRays = 1024 * 1024;
-    private int _rayTextureSize;
-    [SerializeField] private float _minAlpha = 0.5f;
-
-    private struct RayData
-    {
-        // Ints are casted to floats to increase performance
-        Vector2Int rayOriginPixels;
-        Vector2 rayDirection;
-        float viewAngle;
-        int numRaysPerDegree;
-        float highlightAngle;
-        Vector3 highlightCenter;
-        float height;
-        int maximumAmountOfStepsPerRay;
-    };
-    // 12 floats
-    private static readonly int RayDataSize = 12;
-    private List<float> rayData = new List<float>();
-    int rayIdOffset = 0;
-    
-    private ComputeBuffer _visibilityMaskRayData;
-    #endregion Fields
 
     #region Debug
     public Texture2D RenderR8TextureToTexture2D(RenderTexture renderTexture)
@@ -238,7 +295,6 @@ public class VisibilityManager : MonoBehaviour
         tempTexture.Apply();
 
         buffer.Release();
-
 
         return tempTexture;
     }
@@ -307,10 +363,45 @@ public class VisibilityManager : MonoBehaviour
         _clearShaderR8G8B8A8Conditional.Dispatch(0, threadGroupsX, threadGroupsY, 1);
     }
 
-    private void FixedUpdate()
+    private void SimulateEchoPoints()
     {
+        RenderTexture rt = RenderTexture.active;
+        RenderTexture.active = _echoPositionsBackbuffer;
+        GL.Clear(true, true, Color.black);
+        RenderTexture.active = rt;
+        _echoSimulator.SetTexture(0, "EchoGrid", _echoGrid);
+        _echoSimulator.SetTexture(0, "NextEchoGrid", _echoGridBackbuffer);
+        _echoSimulator.SetTexture(0, "EchoPositions", _echoPositions);
+        _echoSimulator.SetTexture(0, "NextEchoPositions", _echoPositionsBackbuffer);
+        _echoSimulator.SetTexture(0, "DepthMap", _mapDepthTexture);
+        _echoSimulator.SetInts("GridSize", new int[] { _maskWidth, _maskHeight });
+        float echoSamplingDepth = _mapCamera.WorldToViewportPoint(new Vector3(0, _echoHeight, 0)).z;
+        echoSamplingDepth = 1 - (echoSamplingDepth - _mapCamera.nearClipPlane) / (_mapCamera.farClipPlane - _mapCamera.nearClipPlane);
+
+        _echoSimulator.SetFloat("samplingDepth", echoSamplingDepth);
+        _echoSimulator.SetVector("_Time", Shader.GetGlobalVector("_Time"));
+        _echoSimulator.SetVector("unity_DeltaTime", Shader.GetGlobalVector("unity_DeltaTime"));
+        _echoSimulator.Dispatch(0, _maskWidth / 8, _maskHeight / 8, 1);
     }
-    private void LateUpdate()
+
+    private void SpawnEchoPoints()
+    {
+        if (echoData.Count / EchoSpawnPointSize == 0)
+        {
+            return;
+        }
+        _echoSpawner.SetTexture(0, "EchoGrid", _echoGridBackbuffer);
+        _echoSpawner.SetTexture(0, "EchoPositions", _echoPositionsBackbuffer);
+        _echoSpawner.SetBuffer(0, "NewDirectionalEchoes", _echoSpawnPoints);
+        _echoSpawnPoints.SetData(echoData.ToArray());
+        _echoSpawner.SetInt("NewEchoCount", echoData.Count / EchoSpawnPointSize);
+        _echoSpawner.SetInts("GridSize", new int[] { _maskWidth, _maskHeight });
+        _echoSpawner.SetVector("_Time", Shader.GetGlobalVector("_Time"));
+        _echoSpawner.Dispatch(0, 1, 1, 1);
+        echoData.Clear();
+    }
+
+    private void renderMainViewMask()
     {
 #if UNITY_EDITOR
         _visibilityMaskShader.SetBuffer(0, RayDataID, _visibilityMaskRayData);
@@ -321,6 +412,8 @@ public class VisibilityManager : MonoBehaviour
         _visibilityMaskShader.SetInt(VisibilityMaskHeightID, MainViewMask.height);
         _visibilityMaskShader.SetInt(RayTextureSizeID, _rayTextureSize);
 #endif
+
+        _visibilityMaskShader.SetTexture(0, "EchoGrid", _echoGridBackbuffer);
 
         Matrix4x4 orthoViewMatrix = _mapCamera.worldToCameraMatrix;
         Matrix4x4 orthoProjectionMatrix = _mapCamera.projectionMatrix;
@@ -351,31 +444,83 @@ public class VisibilityManager : MonoBehaviour
         }
         rayData.Clear();
         rayIdOffset = 0;
+        _swapEchoGrids = !_swapEchoGrids;
+        var tmp = _echoGrid;
+        _echoGrid = _echoGridBackbuffer;
+        _echoGridBackbuffer = tmp;
+        var tmp2 = _echoPositions;
+        _echoPositions = _echoPositionsBackbuffer;
+        _echoPositionsBackbuffer = tmp2;
+    }
+
+
+
+    private void LateUpdate()
+    {
+        SimulateEchoPoints();
+        SpawnEchoPoints();
+        renderMainViewMask();
     }
 
     private void Start()
     {
-        _visibilityMaskRayData = new ComputeBuffer(RayDataSize * MaximumRaysPerFrame, sizeof(float) * RayDataSize);
+        Instance = this;
+
+        _echoSpawnPoints = new ComputeBuffer(MaximumEchoSpawnersPerFrame, EchoSpawnPointSize * sizeof(float), ComputeBufferType.Structured);
+        _visibilityMaskRayData = new ComputeBuffer(RayDataSize * MaximumRaysPerFrame, sizeof(float) * RayDataSize, ComputeBufferType.Structured);
+
 
         _maskHeight = _mapDepthTexture.height;
         _maskWidth = _mapDepthTexture.width;
-        
+
         MainViewMask = new RenderTexture(_maskWidth, _maskHeight, 0)
         {
             enableRandomWrite = true,
             depthStencilFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.None,
             graphicsFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.R16G16B16A16_SFloat
         };
+        MainViewMask.Create();
 
         _rayTextureSize = (int)Math.Sqrt(Math.Pow(2, Math.Ceiling(Math.Log(_maximumTotalAmountOfRays) / Math.Log(2))));
         _furthestVisibleDistances = new RenderTexture(_rayTextureSize, _rayTextureSize, 0)
         {
             enableRandomWrite = true,
             depthStencilFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.None,
-            graphicsFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.R16_SFloat
+            graphicsFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.R16G16_SFloat
         };
-        MainViewMask.Create();
         _furthestVisibleDistances.Create();
+
+        _echoGrid = new RenderTexture(_maskWidth, _maskHeight, 0)
+        {
+            enableRandomWrite = true,
+            depthStencilFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.None,
+            graphicsFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.R16G16_SFloat
+        };
+        _echoGrid.Create();
+
+        _echoGridBackbuffer = new RenderTexture(_maskWidth, _maskHeight, 0)
+        {
+            enableRandomWrite = true,
+            depthStencilFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.None,
+            graphicsFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.R16G16_SFloat
+        };
+        _echoGridBackbuffer.Create();
+        _echoPositions = new RenderTexture(_maskWidth, _maskHeight, 0)
+        {
+            enableRandomWrite = true,
+            depthStencilFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.None,
+            graphicsFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.R16G16B16A16_SFloat
+        };
+        _echoPositions.Create();
+
+        _echoPositionsBackbuffer = new RenderTexture(_maskWidth, _maskHeight, 0)
+        {
+            enableRandomWrite = true,
+            depthStencilFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.None,
+            graphicsFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.R16G16B16A16_SFloat
+        };
+        _echoPositionsBackbuffer.Create();
+
 
         _visibilityConeShader.SetTexture(0, FurthestVisibleDistancesID, _furthestVisibleDistances);
         _visibilityConeShader.SetTexture(0, MapDepthTextureID, _mapDepthTexture);
@@ -388,7 +533,7 @@ public class VisibilityManager : MonoBehaviour
         // B -> HighlightMask
         // A -> EcholocationMask
         _clearShaderR8G8B8A8Conditional.SetTexture(0, ResultID, MainViewMask);
-        _clearShaderR8G8B8A8Conditional.SetVector(ClearColorID, new Vector4(0.0f,0.0f,0.0f,1.0f));
+        _clearShaderR8G8B8A8Conditional.SetVector(ClearColorID, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
         _clearShaderR8G8B8A8Conditional.SetInt("ClearFlags", 0x1 | 0x2 | 0x4 | 0x8);
         ClearMasks();
         _clearShaderR8G8B8A8Conditional.SetInt("ClearFlags", 0x2 | 0x4 | 0x8);
@@ -402,7 +547,6 @@ public class VisibilityManager : MonoBehaviour
         _visibilityMaskShader.SetInt(VisibilityMaskWidthID, MainViewMask.width);
         _visibilityMaskShader.SetInt(VisibilityMaskHeightID, MainViewMask.height);
         _visibilityMaskShader.SetInt(RayTextureSizeID, _rayTextureSize);
-
-
+        
     }
 }

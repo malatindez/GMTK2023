@@ -1,0 +1,81 @@
+#pragma kernel SpawnEchoes
+
+// Buffer of active echoes: 
+// deathTime
+// intensity
+RWTexture2D<float2> EchoGrid;
+
+// accumulator
+// velocity
+// originX
+// originY
+RWTexture2D<float4> EchoPositions;
+// New Echoes
+
+struct EchoData
+{
+    float2 position;
+    float2 direction; // (0,0) for OmniDirectional
+    float intensity;
+    float maximumTimeAlive;
+    float speed;
+    float padding;
+};
+
+StructuredBuffer<EchoData> NewDirectionalEchoes;
+
+uint NewEchoCount;
+int2 GridSize;
+
+// Time
+// _Time.x = time / 20
+// _Time.y = time
+// _Time.z = t * 2
+// _Time.w = t * 3
+float4 _Time;
+
+[numthreads(1, 1, 1)]
+void SpawnEchoes()
+{
+        // For each new echo, copy it to the EchoGrid
+    for (uint i = 0; i < NewEchoCount; i++)
+    {
+        EchoData newEcho = NewDirectionalEchoes[i];
+        if (newEcho.direction.x == 0 && newEcho.direction.y == 0)
+        {
+            for (int dx = -1; dx <= 1; dx++)
+            {
+                for (int dy = -1; dy <= 1; dy++)
+                {
+                    if (dx == 0 && dy == 0)
+                    {
+                        continue;
+                    }
+                    int2 pos = int2(newEcho.position.x + dx, newEcho.position.y + dy);
+                    if(pos.x < 0 || pos.y < 0 || pos.x > GridSize.x || pos.y > GridSize.y)
+                    {
+                        continue;
+                    }
+                    EchoGrid[pos] = float2(_Time.y + newEcho.maximumTimeAlive, newEcho.intensity);
+                    EchoPositions[pos] =
+                    float4(
+                            0,
+                            newEcho.speed,
+                            newEcho.position
+                    );
+
+                }
+            }
+        }
+        else
+        {
+            EchoGrid[newEcho.position] = float2(_Time.y + newEcho.maximumTimeAlive, newEcho.intensity);
+            EchoPositions[newEcho.position] =
+                    float4(
+                            0,
+                            newEcho.speed,
+                            newEcho.position + normalize(newEcho.direction) * 5
+                    );
+        }
+    }
+}

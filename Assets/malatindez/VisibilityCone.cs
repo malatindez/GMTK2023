@@ -3,7 +3,6 @@ using UnityEngine;
 public class VisibilityCone : MonoBehaviour
 {
     #region Fields
-    [SerializeField] private VisibilityManager visibilityManager;
     [SerializeField] private GameObject HighlightCenter;
     public int numRaysPerDegree = 30;
     public int maximumAmountOfStepsPerRay = 1024;
@@ -39,7 +38,7 @@ public class VisibilityCone : MonoBehaviour
             {
 #endif
             if (!firstFrameSkipped) { firstFrameSkipped = true; return; }
-            visibilityManager.UpdateVisibilityMask(
+            VisibilityManager.Instance.UpdateVisibilityMask(
                     transform.forward,
                     transform.position,
                     HighlightCenter.transform.position,

@@ -1,0 +1,176 @@
+// HLSL code in compute shader
+#pragma kernel PropagateEchoes
+
+// Buffer of active echoes: 
+// deathTime
+// intensity
+RWTexture2D<float2> EchoGrid;
+
+// accumulator
+// velocity
+// originX
+// originY
+RWTexture2D<float4> EchoPositions;
+
+// Buffer of next active echoes: 
+// deathTime
+// intensity
+RWTexture2D<float2> NextEchoGrid;
+
+// accumulator
+// velocity
+// originX
+// originY
+RWTexture2D<float4> NextEchoPositions;
+
+Texture2D<float> DepthMap;
+
+
+
+int2 GridSize;
+float samplingDepth;
+
+// TODO:
+// more precise depth camera located just above the player, it should compute the depth map
+// then we will need to pass the change in location per frame to the shader to update echoes locations
+
+static const float DECAY_FACTOR_PER_SECOND = 0.5f;
+static const float REFLECTION_FACTOR = 0.7f;
+static const float MIN_INTENSITY = 0.01f;
+static const float MIN_COS_TO_PROPAGATE = cos(5);
+
+// Time
+// _Time.x = time / 20
+// _Time.y = time
+// _Time.z = t * 2
+// _Time.w = t * 3
+float4 _Time;
+// unity_DeltaTime.x = deltaTime
+// unity_DeltaTime.y = 1 / deltaTime
+// unity_DeltaTime.z = smoothDeltaTime
+// unity_DeltaTime.w = 1 / smoothDeltaTime
+float4 unity_DeltaTime;
+
+
+
+static const float3x3 sobelX = float3x3(-1, 0, 1,
+                      -2, 0, 2,
+                      -1, 0, 1);
+
+static const float3x3 sobelY = float3x3(-1, -2, -1,
+                       0, 0, 0,
+                       1, 2, 1);
+
+
+float Convolve(float3x3 kernel, float3x3 image)
+{
+    float result = 0;
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            result += kernel[i][j] * image[i][j];
+        }
+    }
+    return result;
+}
+
+float2 calculateNormal(int2 position)
+{
+    float depth00 = DepthMap[position + int2(-1, -1)].r;
+    float depth10 = DepthMap[position + int2(0, -1)].r;
+    float depth20 = DepthMap[position + int2(1, -1)].r;
+    float depth01 = DepthMap[position + int2(-1, 0)].r;
+    float depth11 = DepthMap[position].r;
+    float depth21 = DepthMap[position + int2(1, 0)].r;
+    float depth02 = DepthMap[position + int2(-1, 1)].r;
+    float depth12 = DepthMap[position + int2(0, 1)].r;
+    float depth22 = DepthMap[position + int2(1, 1)].r;
+    
+    float3x3 depthMatrix = float3x3(depth00, depth10, depth20,
+                                     depth01, depth11, depth21,
+                                     depth02, depth12, depth22);
+    
+    float dx = Convolve(sobelX, depthMatrix);
+    float dy = Convolve(sobelY, depthMatrix);
+
+    // Normal points towards decreasing depth
+    float2 normal = normalize(float2(dx, dy));
+
+    return normal;
+}
+
+[numthreads(8, 8, 1)]
+void PropagateEchoes(uint3 id : SV_DispatchThreadID)
+{
+    NextEchoGrid[id.xy] = float2(0.0f, 0.0f);
+    NextEchoPositions[id.xy] = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    float deathTime = EchoGrid[id.xy].x;
+    float intensity = EchoGrid[id.xy].y;
+    float accumulator = EchoPositions[id.xy].x;
+    float speed = EchoPositions[id.xy].y;
+    float2 origin= EchoPositions[id.xy].zw;
+
+    float time = _Time.y;
+    float smoothDeltaTime = unity_DeltaTime.z;
+
+    if (deathTime <= time || intensity <= MIN_INTENSITY)
+    {
+        return;
+    }
+
+    intensity -= DECAY_FACTOR_PER_SECOND * smoothDeltaTime;
+
+    // Update accumulator
+    accumulator += speed * smoothDeltaTime;
+
+    if (accumulator <= 1.0f)
+    {
+        // Keep the echo at its original position
+        NextEchoGrid[id.xy] = float2(deathTime, intensity);
+        NextEchoPositions[id.xy] = float4(accumulator, speed, origin);
+        return;
+    }
+    // If accumulator is enough for the echo to propagate to the nearby pixels, 
+    // we propagate it and decrease accumulator by 1.0
+    uint propagate_count = 0;
+    for (int dx = -1; dx <= 1; dx++)
+    {
+        for (int dy = -1; dy <= 1; dy++)
+        {
+            float2 directionVector = normalize(float2(id.xy - origin));
+    
+            float2 newPosition = id.xy + directionVector * accumulator + float2(dx, dy);
+            
+            if (
+                (length(newPosition - origin) < length(id.xy - origin) &&
+                dot(directionVector, normalize(float2(dx, dy))) < MIN_COS_TO_PROPAGATE) || (dx == 0 && dy == 0)
+                )
+            {
+                continue;
+            }
+
+            if (newPosition.x < 0 || newPosition.y < 0 ||
+                    newPosition.x >= GridSize.x || newPosition.y >= GridSize.y)
+            {
+                continue;
+            }
+            if (samplingDepth < DepthMap[newPosition].r)
+            {
+                directionVector = normalize(reflect(directionVector, calculateNormal(newPosition)));
+                intensity *= REFLECTION_FACTOR;
+                origin = newPosition;
+            }
+            float existingIntensity = NextEchoGrid[newPosition].y;
+            if (existingIntensity == 0)
+            {
+                NextEchoGrid[newPosition] = float2(deathTime, intensity);
+                NextEchoPositions[newPosition] = float4(
+                    0 - length(int2(dx,dy)),
+                    speed,
+                    origin
+                );
+            }
+        }
+    }
+}

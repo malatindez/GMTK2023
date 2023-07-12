@@ -79,13 +79,17 @@ Shader "Unlit/MainCameraRenderer" // DO NOT CHANGE. Main camera renderer feature
 
                 // Divide by w to dehomogenize
                 worldPos /= worldPos.w;
-        
                 float4 orthoPos = mul(_OrthoViewProj, worldPos);
                 float2 orthoUV = orthoPos.xy / orthoPos.w;
                 orthoUV = (orthoUV + 1) * 0.5;
                 float4 mask = UNITY_SAMPLE_TEX2D(_MainViewMask, orthoUV);
                 float fog = mask.r;
                 float vis = mask.b > 0 ? mask.b : mask.g;
+                float echo = mask.a;
+                if(echo > 0)
+                {
+                    return float4(echo,echo,echo, 1);
+                }
                 if(vis >= 0.99f)
                 {
                     return col2;
