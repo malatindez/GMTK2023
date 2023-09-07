@@ -120,6 +120,7 @@ public class PlayerV2 : MonoBehaviour
 
         _rigidbody.velocity = desiredMoveDirection * _moveSpeed;
 
+        
         IsWalking = _rigidbody.velocity != Vector3.zero;
     }
 
@@ -134,8 +135,11 @@ public class PlayerV2 : MonoBehaviour
         //Get the angle between the points
         float angle = AngleBetweenTwoPoints(positionOnScreen, mouseOnScreen);
 
-        //Ta Daaa
-        transform.rotation = Quaternion.Euler(new Vector3(0f, -angle + 270f, 0f));
+        //black magic from jorge floid
+        transform.rotation = Quaternion.Lerp(
+            transform.rotation,
+            Quaternion.Euler(new Vector3(0f, _camera.transform.eulerAngles.y - angle - 90, 0f)),
+            Time.deltaTime * 16f);
 
     }
 
