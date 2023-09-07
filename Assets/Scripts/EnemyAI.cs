@@ -22,6 +22,7 @@ public class EnemyAI : MonoBehaviour
     private bool _isPlayerNoticed;
     private GameObject _target;
     private PlayerV2 _currentOwner;
+    private Camera _camera;
 
     private Queue<PatrolPoint> _points;
     private PatrolPoint _currentPoint;
@@ -41,6 +42,7 @@ public class EnemyAI : MonoBehaviour
         _agent = GetComponent<NavMeshAgent>();
         _fieldOfView = GetComponent<FieldOfView>();
         _points = new Queue<PatrolPoint>(_patrolPoints);
+        _camera = Camera.main;
         StartCoroutine(Patrol());
     }
 
@@ -89,8 +91,8 @@ public class EnemyAI : MonoBehaviour
         float vertical = Input.GetAxisRaw("Vertical");
 
         //camera forward and right vectors:
-        var forward = Camera.main.transform.forward;
-        var right = Camera.main.transform.right;
+        var forward = _camera.transform.forward;
+        var right = _camera.transform.right;
 
         //project forward and right vectors on the horizontal plane (y = 0)
         forward.y = 0f;
@@ -110,16 +112,19 @@ public class EnemyAI : MonoBehaviour
     private void RotateToMouse()
     {
         //Get the Screen positions of the object
-        Vector2 positionOnScreen = Camera.main.WorldToViewportPoint(transform.position);
+        Vector2 positionOnScreen = _camera.WorldToViewportPoint(transform.position);
 
         //Get the Screen position of the mouse
-        Vector2 mouseOnScreen = (Vector2)Camera.main.ScreenToViewportPoint(Input.mousePosition);
+        Vector2 mouseOnScreen = (Vector2)_camera.ScreenToViewportPoint(Input.mousePosition);
 
         //Get the angle between the points
         float angle = AngleBetweenTwoPoints(positionOnScreen, mouseOnScreen);
-
-        //Ta Daaa
-        transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(new Vector3(0f, -angle, 0f)), Time.deltaTime * 20f);
+        
+        //black magic from jorge floid
+        transform.rotation = Quaternion.Lerp(
+            transform.rotation,
+            Quaternion.Euler(new Vector3(0f, _camera.transform.eulerAngles.y - angle - 90, 0f)), 
+            Time.deltaTime * 16f);
 
     }
 
