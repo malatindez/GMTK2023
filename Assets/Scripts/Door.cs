@@ -1,13 +1,19 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class Door : MonoBehaviour
 {
     [SerializeField] private float _autoCloseDoorTime;
     private bool _state = false;
     private Animator _animator;
+    private NavMeshObstacle _obstacle;
 
-    private void Start() => _animator = GetComponent<Animator>();
+    private void Start() 
+    { 
+        _animator = GetComponent<Animator>();
+        _obstacle = GetComponent<NavMeshObstacle>();
+    }
 
     public void DoorOpen()
     {
@@ -16,6 +22,7 @@ public class Door : MonoBehaviour
             _animator.Play(Constants.DoorOpenStageName);
             _state = true;
             StartCoroutine(AutoCloseDoor(_autoCloseDoorTime));
+            _obstacle.enabled = false;
         }
     }
 
@@ -24,6 +31,10 @@ public class Door : MonoBehaviour
         yield return new WaitForSeconds(seconds);
         if (seconds != 0) DoorClose();
     }
-    public void DoorClose() => _animator.Play(Constants.DoorCloseStageName);
+    public void DoorClose() 
+    { 
+        _animator.Play(Constants.DoorCloseStageName);
+        _obstacle.enabled = true;
+    }
     private void ReversState() => _state = !_state;
 }
