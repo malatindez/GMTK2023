@@ -100,8 +100,9 @@ public class EnemyAI : MonoBehaviour
 
         //this is the direction in the world space we want to move:
         var desiredMoveDirection = forward * vertical + right * horizontal;
+        
 
-        var dir = transform.position + desiredMoveDirection * 2;
+        var dir = transform.position + desiredMoveDirection * 0.5f;
         _agent.SetDestination(dir);
         IsWalking = horizontal != 0f || vertical != 0f;
     }
@@ -118,7 +119,7 @@ public class EnemyAI : MonoBehaviour
         float angle = AngleBetweenTwoPoints(positionOnScreen, mouseOnScreen);
 
         //Ta Daaa
-        transform.rotation = Quaternion.Euler(new Vector3(0f, -angle + 180f, 0f));
+        transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(new Vector3(0f, -angle, 0f)), Time.deltaTime * 20f);
 
     }
 
