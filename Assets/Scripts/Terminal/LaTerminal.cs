@@ -23,6 +23,10 @@ public class LaTerminal : MonoBehaviour
 
     public void ShowTerminal(string title, string description, IEnumerable<ITerminalCommand> commands)
     {
+        gameObject.SetActive(true);
+
+        Time.timeScale = 0f;
+
         _title.text = title;
         _description.text = description;
 
@@ -57,6 +61,13 @@ public class LaTerminal : MonoBehaviour
                 _cachedButtons[i].gameObject.SetActive(false);
             }
         }
+    }
+
+    public void HideTerminal()
+    {
+        gameObject.SetActive(false);
+
+        Time.timeScale = 1f;
     }
 
     [ContextMenu("Show Test Message")]
