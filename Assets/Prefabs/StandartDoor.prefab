@@ -117,6 +117,7 @@ MonoBehaviour:
   _tutorialText: {fileID: 7530499278115504565}
   _door: {fileID: 18656494249967233}
   _minAccessLevel: 1
+  _maxAccessLevel: 4
   _defaultText: Press E
   _noAccessTextFormat: '{0} access level required'
 --- !u!1001 &1287171866783253691

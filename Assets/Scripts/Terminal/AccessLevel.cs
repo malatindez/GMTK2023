@@ -11,4 +11,5 @@ public enum AccessLevel : byte
     Green,
     Red,
     Blue,
+    Violet,
 }

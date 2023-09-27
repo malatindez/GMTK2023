@@ -4,6 +4,7 @@ public class DoorTrigger : InteractionTrigger
 {
     [SerializeField] private Door _door;
     [SerializeField] private AccessLevel _minAccessLevel;
+    [SerializeField] private AccessLevel _maxAccessLevel = AccessLevel.Violet;
 
     [SerializeField] private string _defaultText = "Press 'E'";
     [SerializeField] private string _noAccessTextFormat = "{0} access level required";
@@ -14,7 +15,7 @@ public class DoorTrigger : InteractionTrigger
     {
         _currentAccessLevel = other.GetComponent<AccessCard>()?.AccessLevel ?? AccessLevel.None;
 
-        if (_currentAccessLevel < _minAccessLevel)
+        if (_currentAccessLevel < _minAccessLevel || _currentAccessLevel > _maxAccessLevel)
         {
             TutorialText.Text.text = string.Format(_noAccessTextFormat, _minAccessLevel);
         }
@@ -28,7 +29,7 @@ public class DoorTrigger : InteractionTrigger
 
     public override void Interact()
     {
-        if (_currentAccessLevel >= _minAccessLevel)
+        if (_currentAccessLevel >= _minAccessLevel && _currentAccessLevel <= _maxAccessLevel)
         {
             if (!_door.IsOpen)
                 _door.DoorOpen();
