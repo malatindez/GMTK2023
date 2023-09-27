@@ -8,8 +8,11 @@ public class InteractionTrigger : MonoBehaviour, IInteractable
     [SerializeField] private TutorialText _tutorialText;
 
     private Collider _collider;
+    private Collider _otherCollider;
 
     protected TutorialText TutorialText => _tutorialText;
+
+    protected Collider OtherCollider => _otherCollider;
 
     private void Awake()
     {
@@ -51,12 +54,14 @@ public class InteractionTrigger : MonoBehaviour, IInteractable
     {
         InteractionHandler.Instance.SetInteractable(this);
         _tutorialText.enabled = true;
+        _otherCollider = other;
     }
 
     protected virtual void ExitTriggerSpace(Collider other)
     {
         InteractionHandler.Instance.RemoveInteractable(this);
         _tutorialText.enabled = false;
+        _otherCollider = null;
     }
 
     public virtual void Interact()

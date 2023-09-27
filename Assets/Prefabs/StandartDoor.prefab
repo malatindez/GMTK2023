@@ -116,9 +116,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _tutorialText: {fileID: 7530499278115504565}
   _door: {fileID: 18656494249967233}
-  _doorAccess: 0
+  _minAccessLevel: 1
   _defaultText: Press E
-  _noAccessTextFormat: access level {0} required
+  _noAccessTextFormat: '{0} access level required'
 --- !u!1001 &1287171866783253691
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -446,7 +446,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87543670b871662489374ff0b21bb048, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _displayName: 
+  _displayName: Standart Door
   _autoCloseDoorTime: 0
   _doorStateChanged:
     m_PersistentCalls:

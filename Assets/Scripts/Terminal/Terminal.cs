@@ -4,10 +4,10 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class LaTerminal : MonoBehaviour
+public class Terminal : MonoBehaviour
 {
-    private static LaTerminal _instance;
-    public static LaTerminal Instance => _instance;
+    private static Terminal _instance;
+    public static Terminal Instance => _instance;
 
     [SerializeField] private Text _title;
     [SerializeField] private Text _description;

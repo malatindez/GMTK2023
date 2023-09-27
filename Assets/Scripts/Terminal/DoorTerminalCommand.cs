@@ -31,7 +31,7 @@ public class DoorTerminalCommand : ITerminalCommand
         else
             _door.DoorClose();
 
-        LaTerminal.Instance.HideTerminal();
+        Terminal.Instance.HideTerminal();
     }
 
     protected virtual void OnTextChanged(EventArgs e)

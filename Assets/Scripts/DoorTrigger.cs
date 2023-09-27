@@ -3,20 +3,20 @@ using UnityEngine;
 public class DoorTrigger : InteractionTrigger
 {
     [SerializeField] private Door _door;
-    [SerializeField] private int _doorAccess;
+    [SerializeField] private AccessLevel _minAccessLevel;
 
     [SerializeField] private string _defaultText = "Press 'E'";
-    [SerializeField] private string _noAccessTextFormat = "access level {0} required";
+    [SerializeField] private string _noAccessTextFormat = "{0} access level required";
 
-    private int _currentAccessLevel;
+    private AccessLevel _currentAccessLevel;
 
     protected override void EnterTriggerSpace(Collider other)
     {
-        _currentAccessLevel = other.GetComponent<AccessLevel>().accessLevel;
+        _currentAccessLevel = other.GetComponent<AccessCard>()?.AccessLevel ?? AccessLevel.None;
 
-        if (_currentAccessLevel < _doorAccess)
+        if (_currentAccessLevel < _minAccessLevel)
         {
-            TutorialText.Text.text = string.Format(_noAccessTextFormat, _doorAccess);
+            TutorialText.Text.text = string.Format(_noAccessTextFormat, _minAccessLevel);
         }
         else
         {
@@ -28,7 +28,7 @@ public class DoorTrigger : InteractionTrigger
 
     public override void Interact()
     {
-        if (_currentAccessLevel >= _doorAccess)
+        if (_currentAccessLevel >= _minAccessLevel)
         {
             if (!_door.IsOpen)
                 _door.DoorOpen();
