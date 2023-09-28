@@ -61,6 +61,28 @@ public class Door : MonoBehaviour
         OnDoorStateChanged();
     }
 
+    [ExecuteInEditMode]
+    [ContextMenu("Disable Manual Open")]
+    public void DisableManualOpen()
+    {
+        DoorTrigger trigger = GetComponentInChildren<DoorTrigger>();
+        TutorialText text = GetComponentInChildren<TutorialText>();
+
+        trigger.gameObject.SetActive(false);
+        text.gameObject.SetActive(false);
+    }
+
+    [ExecuteInEditMode]
+    [ContextMenu("Enable Manual Open")]
+    public void EnableManualOpen()
+    {
+        DoorTrigger trigger = GetComponentInChildren<DoorTrigger>();
+        TutorialText text = GetComponentInChildren<TutorialText>();
+
+        trigger.gameObject.SetActive(true);
+        text.gameObject.SetActive(true);
+    }
+
     protected virtual void OnDoorStateChanged()
     {
         _doorStateChanged?.Invoke();

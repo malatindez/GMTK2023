@@ -6,6 +6,7 @@ public class DoorTrigger : InteractionTrigger
     [SerializeField] private AccessLevel _minAccessLevel;
     [SerializeField] private AccessLevel _maxAccessLevel = AccessLevel.Violet;
 
+    [Space]
     [SerializeField] private string _defaultText = "Press 'E'";
     [SerializeField] private string _noAccessTextFormat = "{0} access level required";
 
@@ -17,14 +18,14 @@ public class DoorTrigger : InteractionTrigger
 
         if (_currentAccessLevel < _minAccessLevel || _currentAccessLevel > _maxAccessLevel)
         {
-            TutorialText.Text.text = string.Format(_noAccessTextFormat, _minAccessLevel);
+            TutorialText.Text.enabled = false;
         }
         else
         {
             TutorialText.Text.text = _defaultText;
+            base.EnterTriggerSpace(other);
         }
-
-        base.EnterTriggerSpace(other);
+        
     }
 
     public override void Interact()
