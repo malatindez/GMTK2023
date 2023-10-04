@@ -9,5 +9,5 @@ public interface ITerminalCommand : ICommand
 {
     event EventHandler TextChanged;
 
-    string Text { get; set; }
+    string Text { get; }
 }

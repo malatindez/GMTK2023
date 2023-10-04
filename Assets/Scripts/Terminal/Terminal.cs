@@ -1,10 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class LaTerminal : MonoBehaviour
+public class Terminal : MonoBehaviour
 {
+    private static Terminal _instance;
+    public static Terminal Instance => _instance;
+
     [SerializeField] private Text _title;
     [SerializeField] private Text _description;
     [SerializeField] private TerminalButton _buttonTemplate;
@@ -16,13 +20,23 @@ public class LaTerminal : MonoBehaviour
 
     private readonly List<TerminalButton> _cachedButtons = new List<TerminalButton>();
 
+    private void Awake()
+    {
+        _instance = this; 
+    }
+
     private void Start()
     {
         _buttonTemplate.gameObject.SetActive(false);
+        gameObject.SetActive(false);
     }
 
     public void ShowTerminal(string title, string description, IEnumerable<ITerminalCommand> commands)
     {
+        gameObject.SetActive(true);
+
+        Time.timeScale = 0f;
+
         _title.text = title;
         _description.text = description;
 
@@ -30,14 +44,21 @@ public class LaTerminal : MonoBehaviour
 
         int i = 0;
         float initY = _description.preferredHeight + _initSpace;
+        EventSystem.current.SetSelectedGameObject(null);
+
         foreach (ITerminalCommand cmd in commands)
         {
             TerminalButton button;
 
             if (_cachedButtons.Count > i)
+            {
                 button = _cachedButtons[i];
+            }
             else
+            {
                 button = Instantiate(_buttonTemplate.gameObject, _buttonTemplate.transform.parent).GetComponent<TerminalButton>();
+                _cachedButtons.Add(button);
+            }
 
             button.gameObject.SetActive(true);
             button.Command = cmd;
@@ -57,6 +78,13 @@ public class LaTerminal : MonoBehaviour
                 _cachedButtons[i].gameObject.SetActive(false);
             }
         }
+    }
+
+    public void HideTerminal()
+    {
+        gameObject.SetActive(false);
+
+        Time.timeScale = 1f;
     }
 
     [ContextMenu("Show Test Message")]

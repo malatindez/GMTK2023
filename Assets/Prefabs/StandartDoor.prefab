@@ -1,5 +1,53 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5044548261460078563
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7835092308665722291}
+  - component: {fileID: 7530499278115504565}
+  m_Layer: 0
+  m_Name: Hint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7835092308665722291
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5044548261460078563}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.1971, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4880499150188701495}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7530499278115504565
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5044548261460078563}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68aef49b17c138e4bae59e75ea1d7e7f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _initialText: Press E
+  _verticalOffset: 0
+  _horizontalOffset: 0
+  _size: 0.024
 --- !u!1 &8930311558920604944
 GameObject:
   m_ObjectHideFlags: 0
@@ -27,7 +75,7 @@ Transform:
   m_GameObject: {fileID: 8930311558920604944}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.0825, z: 0}
-  m_LocalScale: {x: 0.12632, y: 0.16887665, z: 0.20416005}
+  m_LocalScale: {x: 0.12632, y: 0.16887665, z: 0.27265576}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4880499150188701495}
@@ -66,8 +114,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83f2fe3a16f70cd43b4c771023d5e800, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _tutorialText: {fileID: 7530499278115504565}
   _door: {fileID: 18656494249967233}
-  _doorAccess: 0
+  _minAccessLevel: 1
+  _maxAccessLevel: 4
+  _defaultText: Press E
+  _noAccessTextFormat: '{0} access level required'
 --- !u!1001 &1287171866783253691
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -312,6 +364,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 8156463947519788907}
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: b418df01f8b1c1c45907381ceebc3517,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7835092308665722291}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: b418df01f8b1c1c45907381ceebc3517,
         type: 3}
@@ -320,15 +376,15 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: b418df01f8b1c1c45907381ceebc3517,
         type: 3}
       insertIndex: -1
+      addedObject: {fileID: 962654595283163765}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: b418df01f8b1c1c45907381ceebc3517,
+        type: 3}
+      insertIndex: -1
       addedObject: {fileID: 18656494249967233}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: b418df01f8b1c1c45907381ceebc3517,
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 3478634415999816550}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: b418df01f8b1c1c45907381ceebc3517,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 962654595283163765}
   m_SourcePrefab: {fileID: 100100000, guid: b418df01f8b1c1c45907381ceebc3517, type: 3}
 --- !u!4 &4880499150188701495 stripped
 Transform:
@@ -363,6 +419,22 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!208 &962654595283163765
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5255934629988777357}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.09, y: 0.09, z: 0.045}
+  m_MoveThreshold: 0.1
+  m_Carve: 0
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 0.09, z: 0}
+  m_TimeToStationary: 0.5
 --- !u!114 &18656494249967233
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -375,7 +447,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87543670b871662489374ff0b21bb048, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _displayName: Standart Door
   _autoCloseDoorTime: 0
+  _doorStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  _openAnimationName: IsOpen
 --- !u!64 &3478634415999816550
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -398,22 +475,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -1293825569899784563, guid: b418df01f8b1c1c45907381ceebc3517, type: 3}
---- !u!208 &962654595283163765
-NavMeshObstacle:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5255934629988777357}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Shape: 1
-  m_Extents: {x: 0.09, y: 0.09, z: 0.045}
-  m_MoveThreshold: 0.1
-  m_Carve: 0
-  m_CarveOnlyStationary: 1
-  m_Center: {x: 0, y: 0.09, z: 0}
-  m_TimeToStationary: 0.5
 --- !u!1001 &6777347296341629200
 PrefabInstance:
   m_ObjectHideFlags: 0
