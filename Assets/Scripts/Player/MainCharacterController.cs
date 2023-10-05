@@ -16,7 +16,7 @@ public class MainCharacterController : EasyCharacterMovement.AgentCharacter
     private EnemyController _enemy;
     private bool _isWaitngForConfirm;
 
-    public EasyCharacterMovement.AgentCharacter ActiveController => handleInput ? this : _enemy;
+    public EasyCharacterMovement.AgentCharacter ActiveController => _enemy != null ? _enemy : this;
 
     protected override void OnAwake()
     {
