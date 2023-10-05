@@ -1,0 +1,83 @@
+ CHANGE LIST:
+
+Namespace: 
+----------
+
+  - Now all system is within Easy Character Movement namespace
+
+ Character Movement:
+ -------------------
+
+ The Whole class has been completely refactored (completely new component)  to act as a direct replacement for Unity Character Controller.
+
+ The Character Movement component now is a fully kinematic character controller and can be used by itself and as such, it is the one who received most changes in order to improve it, make it more flexible and easier to work with.
+
+
+ - Most Data structures has been replaced / removed:
+
+    GroundDistance -> FindGroundResult
+
+    GroundHit -> FindGroundResult
+
+    MovementHit -> CollisionResult
+
+    RigidbodyHit -> CollisionResult
+
+    LedgeHit -> Removed
+
+    StepHit -> Removed
+
+
+  - IsConstrainedToPlane(), IsContrainedToGround() functions are now properties. ConstrainToPlane() function has been replaced by ConstrainDirectionToPlane() and ConstrainVectorToPlane().
+
+
+  - SetCallbckTarget() and RemoveCallbackTarget() functions has been removed.
+
+
+  - Two events are added replacing old ones:
+
+      Collided
+      FindGround
+
+
+  - Internal collision detections have been removed and replaced by newer versions. It does not use / need the CollisionDetection helper class however it still can be used as a general purpose collision detection library and used by the ThirdPersonController.
+
+
+  Character:
+  ----------
+
+  As part of the CharacterMovement modification, this class has considerably simplified as most of its previous code tied to the CharacterMovement has been removed so the Character class now focuses on the Character movement only (as it should). Due this, some functions like impartPlatformVelocity, impartExternalVelocity, ImpartExternalForces, etc. has been removed.
+
+  - The GroundHit and MovementHit events has been replaced by the Character Movement FindGround and Collided eventes respectively.
+
+  - IsGrounded() method is added. This tells if a Character IsOnWalkableGround AND IsContrainedToGround (eg: Walking).
+
+  - Added several new properties to enable / disable actions, eg: canEverSwim, canEverJump, canEverSprint, etc.
+
+  - Added new sprint events:
+
+      Sprinted.
+      StoppedSprinting.
+
+
+  - OnMoved method has been replaced by Move method.
+
+
+  - SetupPlayerInput has been replaced by InitPlayerInput and a new DeInitPlayerInput has been added. This helps to make it fully compatible with Unity Play Mode feature.
+
+
+ Collision Detection:
+ --------------------
+
+    This class its not used by Character Movement component, and its keep now as a general purpouse collision detection library.
+
+
+ PlatformMovement:
+ -----------------
+
+    Removed, as now platforms are transparenlty managed without you having to write a special script or perform further tasks.
+
+  ICharacterMovementCallbacks:
+  ----------------------------
+
+    This has been removed as its not used / required anymore.
