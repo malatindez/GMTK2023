@@ -20,7 +20,7 @@ public class InteractionHandler : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.E))
         {
-            _currentInteractableObject?.Interact(); 
+            _currentInteractableObject?.Interact();  
         }
     }
 

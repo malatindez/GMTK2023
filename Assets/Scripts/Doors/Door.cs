@@ -17,6 +17,7 @@ public class Door : MonoBehaviour
     private bool _state = false;
     private Animator _animator;
     private NavMeshObstacle _obstacle;
+    private Collider _collider;
 
     public string DisplayName => _displayName;
     public bool IsOpen => _state;
@@ -30,6 +31,7 @@ public class Door : MonoBehaviour
     { 
         _animator = GetComponent<Animator>();
         _obstacle = GetComponent<NavMeshObstacle>();
+        _collider = GetComponent<Collider>();
 
         _openAnimation = Animator.StringToHash(_openAnimationName);
     }
@@ -42,6 +44,7 @@ public class Door : MonoBehaviour
             _state = true;
             StartCoroutine(AutoCloseDoor(_autoCloseDoorTime));
             _obstacle.enabled = false;
+            _collider.enabled = false;
             OnDoorStateChanged();
         }
     }
@@ -57,6 +60,7 @@ public class Door : MonoBehaviour
     { 
         _animator.SetBool(_openAnimation, false);
         _obstacle.enabled = true;
+        _collider.enabled = true;
         _state = false;
         OnDoorStateChanged();
     }

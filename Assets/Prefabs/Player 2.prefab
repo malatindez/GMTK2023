@@ -163,9 +163,6 @@ GameObject:
   - component: {fileID: 2830376890306867776}
   - component: {fileID: 1342899929744476317}
   - component: {fileID: 1449685991595485650}
-  - component: {fileID: 5917103760633226140}
-  - component: {fileID: 7635924612360032712}
-  - component: {fileID: 3974649464808346207}
   m_Layer: 7
   m_Name: Player 2
   m_TagString: Untagged
@@ -214,8 +211,8 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
   m_Constraints: 112
   m_CollisionDetection: 0
 --- !u!136 &2830376890306867776
@@ -270,63 +267,6 @@ AudioListener:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 806781633534000393}
   m_Enabled: 1
---- !u!143 &5917103760633226140
-CharacterController:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 806781633534000393}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 0
-  serializedVersion: 3
-  m_Height: 2
-  m_Radius: 0.5
-  m_SlopeLimit: 45
-  m_StepOffset: 0.3
-  m_SkinWidth: 0.08
-  m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &7635924612360032712
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 806781633534000393}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5e950d473998e5046b97ce705dfa9d28, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _accessLevel: 4
---- !u!114 &3974649464808346207
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 806781633534000393}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 95b4c959b42732e4894bf6d91f4768fa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _controlRange: 6
-  _moveSpeed: 6
-  _clickTargets:
-    serializedVersion: 2
-    m_Bits: 512
-  _visibilityCone: {fileID: 8776950349466355130}
 --- !u!1 &928407291156659035
 GameObject:
   m_ObjectHideFlags: 0

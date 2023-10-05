@@ -26,7 +26,7 @@ public class DoorTerminalTrigger : InteractionTrigger
             _commands[i] = new DoorTerminalCommand(_doors[i]);
         }
 
-        _exitCommand = new TerminalCommand(Terminal.Instance.HideTerminal) { Text = "Exit" }; ;
+        _exitCommand = new TerminalCommand(Terminal.Instance.HideTerminal) { Text = "Exit" };
         _commands[_doors.Length] = _exitCommand;
     }
 

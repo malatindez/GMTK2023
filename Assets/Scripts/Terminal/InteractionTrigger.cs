@@ -28,11 +28,11 @@ public class InteractionTrigger : MonoBehaviour, IInteractable
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.TryGetComponent(out PlayerV2 player))
+        if (other.TryGetComponent(out MainCharacterController player))
         {
             EnterTriggerSpace(other);
         }
-        else if (other.TryGetComponent(out EnemyAI enemy) && enemy.IsUnderControl)
+        else if (other.TryGetComponent(out EnemyController enemy) && enemy.IsUnderControl)
         {
             EnterTriggerSpace(other);
         }
@@ -40,11 +40,11 @@ public class InteractionTrigger : MonoBehaviour, IInteractable
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.TryGetComponent(out PlayerV2 player))
+        if (other.TryGetComponent(out MainCharacterController player))
         {
             ExitTriggerSpace(other);
         }
-        else if (other.TryGetComponent(out EnemyAI enemy) && enemy.IsUnderControl)
+        else if (other.TryGetComponent(out EnemyController enemy) && enemy.IsUnderControl)
         {
             ExitTriggerSpace(other);
         }

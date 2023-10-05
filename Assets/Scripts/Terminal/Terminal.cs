@@ -22,7 +22,7 @@ public class Terminal : MonoBehaviour
 
     private void Awake()
     {
-        _instance = this; 
+        _instance = this;  
     }
 
     private void Start()
@@ -34,6 +34,7 @@ public class Terminal : MonoBehaviour
     public void ShowTerminal(string title, string description, IEnumerable<ITerminalCommand> commands)
     {
         gameObject.SetActive(true);
+        MainCharacterController.Instance.ActiveController.handleInput = false;
 
         Time.timeScale = 0f;
 
@@ -83,6 +84,7 @@ public class Terminal : MonoBehaviour
     public void HideTerminal()
     {
         gameObject.SetActive(false);
+        MainCharacterController.Instance.ActiveController.handleInput = true;
 
         Time.timeScale = 1f;
     }

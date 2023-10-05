@@ -157,6 +157,7 @@ public class EnemyAI : MonoBehaviour
                 _currentPoint = _points.Dequeue();
                 _points.Enqueue(_currentPoint);
 
+                Debug.Log($"Current pos: {transform.position}, target: {_currentPoint.transform.position}");
                 _agent.SetDestination(_currentPoint.transform.position);
                 IsWalking = true;
             }
@@ -213,4 +214,5 @@ public class EnemyAI : MonoBehaviour
         _noticeFx.SetActive(true);
         _noticeSound.Play();
     }
+
 }
