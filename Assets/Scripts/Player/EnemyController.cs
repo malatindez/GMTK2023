@@ -2,8 +2,11 @@ using EasyCharacterMovement;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
+using UnityEngine.AI;
 
 [RequireComponent(typeof(EnemyParameters))]
+[RequireComponent(typeof(FieldOfView))]
 public class EnemyController : AgentCharacter
 {
     [Space]
@@ -25,16 +28,20 @@ public class EnemyController : AgentCharacter
     private Coroutine _patrolCoroutine;
 
     private EnemyParameters _parameters;
+    private FieldOfView _fieldOfView;
 
     public bool CanBeControlled { get; private set; } = true;
 
     public bool IsUnderControl { get; private set; }
+
+    public bool IsPatrolling { get; private set; }
 
     protected override void OnAwake()
     {
         base.OnAwake();
 
         _parameters = GetComponent<EnemyParameters>();
+        _fieldOfView = GetComponent<FieldOfView>();
         _patrolPointsQueue = new Queue<PatrolPoint>(_patrolPoints);
     }
 
@@ -50,6 +57,22 @@ public class EnemyController : AgentCharacter
         if (_patrolPoints != null && _patrolPoints.Length > 0)
         {
             _patrolCoroutine = StartCoroutine(StartPatrol());
+        }
+    }
+
+    protected override void OnFixedUpdate()
+    {
+        base.OnFixedUpdate();
+
+        if (IsPatrolling)
+        {
+            if (_fieldOfView.CanSeeTarget && _fieldOfView.Target.TryGetComponent(out MainCharacterController player))
+            {
+                if (player.IsInSafeZone) return;
+
+                StopPatrol();
+                StartCoroutine(OnNoticed(player));
+            }
         }
     }
 
@@ -77,6 +100,22 @@ public class EnemyController : AgentCharacter
         }
     }
 
+    protected bool CanReachTarget(Vector3 target)
+    {
+        NavMeshPath navMeshPath = new NavMeshPath();
+        //create path and check if it can be done
+        // and check if navMeshAgent can reach its target
+        if (agent.CalculatePath(target, navMeshPath) && navMeshPath.status == NavMeshPathStatus.PathComplete)
+        {
+            //agent.SetPath(navMeshPath);
+
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
 
     public override void OnArrive()
@@ -89,7 +128,7 @@ public class EnemyController : AgentCharacter
     public void EnterBeforeControl()
     {
         _beforControlFx.SetActive(true);
-        _beforeControlSound?.Play(); 
+        _beforeControlSound?.Play();
     }
 
     public void ExitBeforeControl()
@@ -99,8 +138,9 @@ public class EnemyController : AgentCharacter
 
     public void StartControll()
     {
-        StopCoroutine(_patrolCoroutine);
+        StopPatrol();
         agent.SetDestination(transform.position); // stop moving
+
         _visibilityCone.enabled = true;
         handleInput = true;
 
@@ -111,6 +151,8 @@ public class EnemyController : AgentCharacter
 
     public void StopControl()
     {
+        agent.SetDestination(transform.position); // stop moving
+
         _visibilityCone.enabled = false;
         handleInput = false;
 
@@ -132,6 +174,8 @@ public class EnemyController : AgentCharacter
 
     private IEnumerator StartPatrol()
     {
+        IsPatrolling = true;
+
         while (true)
         {
             _isPointReached = false;
@@ -139,11 +183,40 @@ public class EnemyController : AgentCharacter
             MoveToLocation(point.transform.position);
 
             while (!_isPointReached)
-                yield return new WaitForFixedUpdate();
+                yield return CoroutineStaticInstructions.WaitForFixedUpdate;
 
             this.characterMovement.velocity = Vector3.zero;
             if (point.Delay != 0)
                 yield return new WaitForSeconds(point.Delay);
+        }
+    }
+
+    private void StopPatrol()
+    {
+        IsPatrolling = false;
+        StopCoroutine(_patrolCoroutine);
+    }
+
+    private IEnumerator OnNoticed(MainCharacterController player)
+    {
+        _playerNoticedSound.Play();
+        
+        while (true)
+        {
+            agent.SetDestination(player.transform.position);
+
+            yield return CoroutineStaticInstructions.WaitForFixedUpdate;
+
+            if (IsUnderControl)
+            {
+                yield break;
+            }
+
+            if (Vector3.Distance(transform.position, player.transform.position) <= 1)
+            {
+                player.Kill();
+                yield break;
+            }
         }
     }
 

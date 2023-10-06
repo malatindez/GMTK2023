@@ -17,6 +17,8 @@ public class MainCharacterController : EasyCharacterMovement.AgentCharacter
     private EnemyController _enemy;
     private bool _isWaitngForConfirm;
 
+    public bool IsInSafeZone { get; set; } = true;
+
     public EasyCharacterMovement.AgentCharacter ActiveController => _enemy != null ? _enemy : this;
 
     protected override void OnAwake()
@@ -94,7 +96,7 @@ public class MainCharacterController : EasyCharacterMovement.AgentCharacter
 
                 bool timePassed = Time.time - startTime >= _startControlDelay; 
 
-                if (timePassed && TryGetEnemy(out EnemyController enemy2) && enemy == enemy2 && enemy.CanBeControlled)
+                if (timePassed && handleInput && TryGetEnemy(out EnemyController enemy2) && enemy == enemy2 && enemy.CanBeControlled)
                 {
                     agent.SetDestination(transform.position); // stop moving
                     StartEnemyControll(enemy);
@@ -132,5 +134,12 @@ public class MainCharacterController : EasyCharacterMovement.AgentCharacter
 
         enemy = null;
         return false;
+    }
+
+    public void Kill()
+    {
+        Debug.Log("Played dead");
+        handleInput = false;
+        agent.SetDestination(transform.position);
     }
 }
