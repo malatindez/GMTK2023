@@ -8,6 +8,12 @@ public class EnemyController : AgentCharacter
 {
     [Space]
     [SerializeField] VisibilityCone _visibilityCone;
+    [SerializeField] GameObject _beforControlFx;
+
+    [Space]
+    [SerializeField] AudioSource _beforeControlSound;
+    [SerializeField] AudioSource _controlStartSound;
+    [SerializeField] AudioSource _playerNoticedSound;
 
     [Space]
     [SerializeField] private PatrolPoint[] _patrolPoints;
@@ -80,6 +86,17 @@ public class EnemyController : AgentCharacter
         _isPointReached = true;
     }
 
+    public void EnterBeforeControl()
+    {
+        _beforControlFx.SetActive(true);
+        _beforeControlSound?.Play(); 
+    }
+
+    public void ExitBeforeControl()
+    {
+        _beforControlFx.SetActive(false);
+    }
+
     public void StartControll()
     {
         StopCoroutine(_patrolCoroutine);
@@ -88,6 +105,8 @@ public class EnemyController : AgentCharacter
         handleInput = true;
 
         IsUnderControl = true;
+
+        //_controlStartSound?.Play();
     }
 
     public void StopControl()

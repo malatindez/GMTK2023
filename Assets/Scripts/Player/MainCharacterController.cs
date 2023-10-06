@@ -9,6 +9,7 @@ public class MainCharacterController : EasyCharacterMovement.AgentCharacter
     [Space]
     [SerializeField] private LayerMask _enemyMask;
     [SerializeField] private float _infectMindRadius = 5;
+    [SerializeField] private float _startControlDelay = 1;
 
     [Space]
     [SerializeField] VisibilityCone _visibilityCone;
@@ -80,13 +81,20 @@ public class MainCharacterController : EasyCharacterMovement.AgentCharacter
 
     private IEnumerator WaitForConfirm(EnemyController enemy)
     {
+        float startTime = Time.time;
+        enemy.EnterBeforeControl();
+
         while (true)
         {
             yield return null;
 
             if (Input.GetMouseButtonUp(0))
             {
-                if (TryGetEnemy(out EnemyController enemy2) && enemy == enemy2 && enemy.CanBeControlled)
+                enemy.ExitBeforeControl();
+
+                bool timePassed = Time.time - startTime >= _startControlDelay; 
+
+                if (timePassed && TryGetEnemy(out EnemyController enemy2) && enemy == enemy2 && enemy.CanBeControlled)
                 {
                     agent.SetDestination(transform.position); // stop moving
                     StartEnemyControll(enemy);
