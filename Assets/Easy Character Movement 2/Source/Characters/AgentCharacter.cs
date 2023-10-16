@@ -294,7 +294,7 @@ namespace EasyCharacterMovement
         {
             // Movement (click-to-move)
 
-            if (Input.GetMouseButton(0))
+            /*if (Input.GetMouseButton(0))
             {
                 Vector2 mousePosition = Input.mousePosition;
 
@@ -312,7 +312,9 @@ namespace EasyCharacterMovement
                 // Default movement input
 
                 base.HandleInput();
-            }
+            }*/
+
+            base.HandleInput();
         }
         
         /// <summary>

@@ -90,13 +90,19 @@ public class MainCharacterController : EasyCharacterMovement.AgentCharacter
         {
             yield return null;
 
-            if (Input.GetMouseButtonUp(0))
+            if (!Input.GetMouseButton(0))
+            {
+                enemy.ExitBeforeControl();
+                yield break;
+            }
+
+            bool timePassed = Time.time - startTime >= _startControlDelay;
+
+            if (timePassed)
             {
                 enemy.ExitBeforeControl();
 
-                bool timePassed = Time.time - startTime >= _startControlDelay; 
-
-                if (timePassed && handleInput && TryGetEnemy(out EnemyController enemy2) && enemy == enemy2 && enemy.CanBeControlled)
+                if (timePassed && handleInput && enemy.CanBeControlled)
                 {
                     agent.SetDestination(transform.position); // stop moving
                     StartEnemyControll(enemy);
@@ -140,6 +146,7 @@ public class MainCharacterController : EasyCharacterMovement.AgentCharacter
     {
         Debug.Log("Played dead");
         handleInput = false;
+        _visibilityCone.enabled = false;
         agent.SetDestination(transform.position);
     }
 }
